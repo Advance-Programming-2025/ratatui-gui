@@ -35,18 +35,16 @@ impl App {
         let mut last_frame = Instant::now();
 
         while !self.exit && self.gamestate == GameState::Running {
-            // --- 1. DISEGNO (Solo se è passato il tempo del frame_rate) ---
+            // --- 1. INPUT UTENTE (PRIMA DI TUTTO per massima reattività) ---
+            handle_game_state(self)?;
+
+            // --- 2. DISEGNO (Solo se è passato il tempo del frame_rate) ---
             if last_frame.elapsed() >= self.frame_rate {
                 terminal
                     .draw(|frame| render_ui(self, frame))
                     .map_err(|_| "Error drawing UI")?;
                 last_frame = Instant::now();
             }
-
-            // --- 2. INPUT UTENTE (Non bloccante, timeout brevissimo) ---
-            // Usiamo un timeout minuscolo per non bloccare il resto della logica
-            // Attualmente non sembra necessario un timeout così breve, ma è una buona pratica
-            handle_game_state(self)?;
 
             // --- 3. GESTIONE MESSAGGI (Continua) ---
             // Processiamo piccoli batch ad ogni iterazione del loop
@@ -66,7 +64,7 @@ impl App {
         Ok(())
     }
 
-    fn get_game_info(&mut self){
+    fn get_game_info(&mut self) {
         self.planets_info = self.orchestrator.get_planets_info();
         self.probability_sunray = get_sunray_probability();
     }

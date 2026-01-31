@@ -31,8 +31,8 @@ pub(crate) fn render_game_ui(app: &App, frame: &mut Frame) {
         .direction(Direction::Horizontal)
         .constraints([
             Constraint::Percentage(30),
-            Constraint::Percentage(40),
-            Constraint::Percentage(30),
+            Constraint::Percentage(10),
+            Constraint::Percentage(60),
         ])
         .split(outer_layout[1]);
 
@@ -59,7 +59,7 @@ pub(crate) fn render_game_ui(app: &App, frame: &mut Frame) {
     explorers::render_explorers(app, frame, right_layout[0]);
 
     // 3. RENDERING INSTRUCTIONS
-    let inst = Paragraph::new("Q: Quit | S: Start | P: Pause").block(
+    let inst = Paragraph::new("Q: Quit | P: Pause/Unpause").block(
         Block::bordered()
             .title(" Instructions ")
             .border_style(Style::default().fg(Color::DarkGray)),
@@ -90,7 +90,7 @@ fn render_globals_info(app: &App, frame: &mut Frame, area: Rect) {
         Span::styled(" | ", Style::default().fg(Color::Gray)),
         Span::styled("Total Explorers: ", Style::default().fg(Color::Gray)),
         Span::styled(
-            format!("{}", app.explorers.len()),
+            format!("{}", app.explorers_info.len()),
             Style::default()
                 .fg(Color::White)
                 .add_modifier(Modifier::BOLD),
