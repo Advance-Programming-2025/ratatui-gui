@@ -6,7 +6,7 @@ use ratatui::Frame;
 use crate::app::App;
 use crate::game_state::GameState;
 
-pub fn render_ui(app: &App, frame: &mut Frame) {
+pub fn render_ui(app: &mut App, frame: &mut Frame) {
     match app.get_game_state() {
         GameState::WaitingStart => {
             // Show start screen
@@ -19,7 +19,9 @@ pub fn render_ui(app: &App, frame: &mut Frame) {
         GameState::Paused => {
             // Show game UI with pause overlay
             main_screen::render_game_ui(app, frame);
-            screens::render_pause_overlay(app, frame);
+        }
+        GameState::Ended=>{
+            main_screen::render_game_ui(app, frame);
         }
     }
 }

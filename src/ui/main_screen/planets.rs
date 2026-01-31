@@ -8,7 +8,7 @@ use ratatui::{
 
 use crate::app::App;
 
-pub fn render_planets_table(app: &App, frame: &mut Frame, area: Rect) {
+pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
     let header = Row::new(vec!["ID", "Rocket", "Energy", "Status", "Incoming"]).style(
         Style::default()
             .fg(Color::Yellow)
@@ -41,13 +41,13 @@ pub fn render_planets_table(app: &App, frame: &mut Frame, area: Rect) {
                 Cell::from(status.to_string()),
                 Cell::from("-".to_string()),
             ]);
-
+            row
             // Evidenzia la riga selezionata
-            if app.planet_id_selector == Some(*id) {
-                row.style(Style::default().bg(Color::DarkGray).fg(Color::White))
-            } else {
-                row
-            }
+            // if app.planet_id_selector == Some(*id) {
+            //     row.style(Style::default().bg(Color::DarkGray).fg(Color::White))
+            // } else {
+            //     row
+            // }
         })
         .collect();
 
@@ -62,7 +62,10 @@ pub fn render_planets_table(app: &App, frame: &mut Frame, area: Rect) {
         ],
     )
     .header(header)
-    .block(Block::bordered().title(" One million crabs galaxy "));
+    .block(Block::bordered().title(" Planets ").border_style(Style::default().fg(Color::Green)))
+    // AGGIUNTA: Definiamo lo stile della riga selezionata centralmente
+    .row_highlight_style(Style::default().bg(Color::DarkGray).fg(Color::White));
 
-    frame.render_widget(table, area);
+    // CAMBIO: Usa render_stateful_widget invece di render_widget
+    frame.render_stateful_widget(table, area, &mut app.table_state);
 }

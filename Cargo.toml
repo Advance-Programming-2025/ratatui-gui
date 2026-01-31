@@ -8,7 +8,5 @@ crossterm = "0.29.0"
 ratatui = "0.30.0"
 omc-galaxy = {path= "/Users/marco/Desktop/omc-galaxy"}
 logging_txt = {path="logging_txt"}
-
-# omc-galaxy = {path= "/Users/marco/Desktop/the real one/omc-galaxy"}
 dotenv = "0.15.0"
 log = "0.4.29"

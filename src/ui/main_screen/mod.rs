@@ -1,6 +1,8 @@
-mod debug;
+mod log;
 mod explorers;
 mod planets;
+mod global;
+mod instructions;
 
 use ratatui::{
     Frame,
@@ -12,103 +14,94 @@ use ratatui::{
 
 use crate::app::App;
 
-pub(crate) fn render_game_ui(app: &App, frame: &mut Frame) {
-    // Outer Layout: 3 rows. 1.Top Margin 2.Main UI 3.Bottom Margin
-    // 1. Globals variables regarding the galaxy
-    // 2. Main layout
-    // 3. Command line for user debug/gameplay ????
+pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
+    // Layout principale: 2 righe (Header | Main)
     let outer_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(3),
-            Constraint::Fill(1),
-            Constraint::Length(3),
+            Constraint::Length(3),  // Global variables
+            Constraint::Fill(1),    // Main content
         ])
         .split(frame.area());
 
-    // Main Layout: 3 columns. 1.Planets 2.1 Explorers 2.2 Instructions 3.Debug Messages
+    // Layout principale: 2 colonne (Left 40% | Right 60%)
     let main_layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
-            Constraint::Percentage(30),
-            Constraint::Percentage(10),
-            Constraint::Percentage(60),
+            Constraint::Percentage(40),  // Left column (Explorers + Planets)
+            Constraint::Percentage(60),  // Right column (Extra + Instructions)
         ])
         .split(outer_layout[1]);
 
-    // Planets Area
-    let left_layout = main_layout[0];
-
-    // Up Explorers and under Instructions
-    let right_layout = Layout::default()
+    // Left column: Explorers sopra, Planets sotto
+    let left_column = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+        .constraints([
+            Constraint::Length(6),   // Explorers (max 2, compatti)
+            Constraint::Fill(1),     // Planets (scrollabile)
+        ])
+        .split(main_layout[0]);
+
+    // Right column: Extra Info sopra, Instructions sotto
+    let right_column = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage(60),  // Extra info
+            Constraint::Percentage(40),  // Instructions
+        ])
         .split(main_layout[1]);
 
-    // Debug Messages Area
-    let debug_area = main_layout[2];
-
     /////////// RENDERING SECTIONS //////////////////
-    // Top varaibles rendering and buttons
-    render_globals_info(app, frame, outer_layout[0]);
+    
+    // 1. Global variables (top)
+    global::render_globals_info(app, frame, outer_layout[0]);
 
-    // 1. RENDERING PLANETS TABLE
-    planets::render_planets_table(app, frame, left_layout);
+    // 2. Explorers (top left)
+    explorers::render_explorers(app, frame, left_column[0]);
 
-    // 2. RENDERING EXPLORERS (LIST)
-    explorers::render_explorers(app, frame, right_layout[0]);
+    // 3. Planets (bottom left)
+    planets::render_planets_table(app, frame, left_column[1]);
 
-    // 3. RENDERING INSTRUCTIONS
-    let inst = Paragraph::new("Q: Quit | P: Pause/Unpause").block(
+    // 4. Extra Info (top right)
+    render_extra_info(app, frame, right_column[0]);
+
+    // 5. Instructions (bottom right)
+    instructions::render_instructions(app, frame, right_column[1]);
+
+    // 6. Log Overlay (se attivo, copre solo la colonna destra)
+    if app.show_log_overlay {
+        log::render_log_overlay(app, frame, main_layout[1]);
+    }
+}
+fn render_extra_info(app: &App, frame: &mut Frame, area: Rect) {
+    let text = vec![
+        Line::from(""),
+        Line::from(Span::styled(
+            "  Extra Stats & Info",
+            Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD),
+        )),
+        Line::from(""),
+        Line::from(vec![
+            Span::styled("  Selected Planet: ", Style::default().fg(Color::Gray)),
+            Span::styled(
+                format!("{}", app.planet_id_selector.map_or("None".to_string(), |id| id.to_string())),
+                Style::default().fg(Color::White).add_modifier(Modifier::BOLD),
+            ),
+        ]),
+        Line::from(""),
+        Line::from(vec![
+            Span::styled("  Log Overlay: ", Style::default().fg(Color::Gray)),
+            Span::styled(
+                if app.show_log_overlay { "ON" } else { "OFF" },
+                Style::default().fg(if app.show_log_overlay { Color::Green } else { Color::Red }).add_modifier(Modifier::BOLD),
+            ),
+        ]),
+    ];
+
+    let paragraph = Paragraph::new(text).block(
         Block::bordered()
-            .title(" Instructions ")
+            .title(" Extra Info ")
             .border_style(Style::default().fg(Color::DarkGray)),
     );
-    frame.render_widget(inst, right_layout[1]);
-
-    // 4. RENDERING DEBUG MESSAGES
-    debug::render_debug_messages(app, frame, debug_area);
-}
-
-fn render_globals_info(app: &App, frame: &mut Frame, area: Rect) {
-    let title_text = vec![Line::from(vec![
-        Span::styled("Simulation Time: ", Style::default().fg(Color::Gray)),
-        Span::styled(
-            format!("App simultation time???",),
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled(" | ", Style::default().fg(Color::Gray)),
-        Span::styled("Total Planets: ", Style::default().fg(Color::Gray)),
-        Span::styled(
-            format!("{}", app.planets_info.len()),
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled(" | ", Style::default().fg(Color::Gray)),
-        Span::styled("Total Explorers: ", Style::default().fg(Color::Gray)),
-        Span::styled(
-            format!("{}", app.explorers_info.len()),
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled(" | ", Style::default().fg(Color::Gray)),
-        Span::styled("Probability Sunray: ", Style::default().fg(Color::Gray)),
-        Span::styled(
-            format!("{}%", app.probability_sunray),
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
-    ])];
-    let title = Paragraph::new(title_text).alignment(Alignment::Left).block(
-        Block::default()
-            .borders(Borders::ALL)
-            .border_style(Style::default().fg(Color::Blue))
-            .style(Style::default().bg(Color::Black)),
-    );
-    frame.render_widget(title, area);
+    frame.render_widget(paragraph, area);
 }

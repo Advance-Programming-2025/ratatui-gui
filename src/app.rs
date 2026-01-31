@@ -1,11 +1,6 @@
-use omc_galaxy::{
-    Orchestrator, PlanetInfoMap,
-    utils::{ExplorerInfo, ExplorerInfoMap, registry::PlanetTypeIter},
-};
-use std::{
-    sync::Arc,
-    time::{Duration, Instant},
-};
+use omc_galaxy::{Orchestrator, PlanetInfoMap, utils::{ExplorerInfo, ExplorerInfoMap, registry::PlanetTypeIter}};
+use ratatui::widgets::TableState;
+use std::{sync::Arc, time::{Duration, Instant}};
 
 use crate::{game_state::GameState, tui_loggers::LogBuffer};
 use omc_galaxy::settings;
@@ -31,10 +26,14 @@ pub struct App {
 
     //UI planet selector variables
     pub planet_id_selector: Option<u32>,
+    pub(crate) table_state: TableState,
+    
+    //UI log overlay toggle
+    pub show_log_overlay: bool,
 }
 
 impl App {
-    pub fn new(orchestrator: Orchestrator, log_buffer: Arc<LogBuffer>) -> Self {
+    pub fn new(orchestrator: Orchestrator, log_buffer:Arc<LogBuffer>) -> Self {
         Self {
             gamestate: GameState::WaitingStart,
             planets_info: orchestrator.get_planets_info(),
@@ -48,7 +47,10 @@ impl App {
             frame_rate: Duration::from_millis(33), // UI fluida a 30 FPS
             log_entries: log_buffer,
 
-            planet_id_selector: None,
+            planet_id_selector:None,
+            table_state: TableState::default(),
+
+            show_log_overlay: false,
         }
     }
 
@@ -74,41 +76,41 @@ impl App {
         Ok(())
     }
 
-    pub(crate) fn set_sunray_increment(&mut self) {
-        settings::set_sunray_probability(self.probability_sunray + 1);
+    pub(crate)fn set_sunray_increment(&mut self){
+        settings::set_sunray_probability(self.probability_sunray+1);
     }
-    pub(crate) fn set_sunray_decrement(&mut self) {
-        settings::set_sunray_probability(self.probability_sunray - 1);
+    pub(crate)fn set_sunray_decrement(&mut self){
+        settings::set_sunray_probability(self.probability_sunray-1);
     }
 }
 
+
 // Selector for the planet table
-impl App {
-    pub(crate) fn increment_id_selector(&mut self) {
-        self.planet_id_selector = match self.planet_id_selector {
-            Some(id) => {
-                let new_id = if id == (self.planets_info.len() - 1) as u32 {
-                    0
-                } else {
-                    id + 1
-                };
-                Some(new_id)
-            }
-            None => Some(0),
-        }
+impl App{
+    pub(crate) fn increment_id_selector(&mut self){
+        let n = self.planets_info.len();
+        if n == 0 { return; }
+
+        let i = match self.table_state.selected() {
+            Some(i) => if i >= n - 1 { 0 } else { i + 1 },
+            None => 0,
+        };
+        
+        self.table_state.select(Some(i));
+        // Sincronizziamo il vecchio selector se serve ancora altrove
+        self.planet_id_selector = Some(i as u32);
     }
 
-    pub(crate) fn decrement_id_selector(&mut self) {
-        self.planet_id_selector = match self.planet_id_selector {
-            Some(id) => {
-                let new_id = if id == 0 as u32 {
-                    (self.planets_info.len() - 1) as u32
-                } else {
-                    id - 1
-                };
-                Some(new_id)
-            }
-            None => Some((self.planets_info.len() - 1) as u32),
-        }
+    pub(crate) fn decrement_id_selector(&mut self){
+        let n = self.planets_info.len();
+        if n == 0 { return; }
+
+        let i = match self.table_state.selected() {
+            Some(i) => if i == 0 { n - 1 } else { i - 1 },
+            None => n - 1,
+        };
+
+        self.table_state.select(Some(i));
+        self.planet_id_selector = Some(i as u32);
     }
 }

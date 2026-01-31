@@ -44,7 +44,7 @@ pub fn render_start_screen(app: &App, frame: &mut Frame) {
         Line::from(vec![
             Span::styled("    Press ", Style::default().fg(Color::Gray)),
             Span::styled(
-                "S",
+                "ENTER",
                 Style::default()
                     .fg(Color::Green)
                     .add_modifier(Modifier::BOLD),
@@ -75,7 +75,7 @@ pub fn render_start_screen(app: &App, frame: &mut Frame) {
         Block::default()
             .borders(Borders::ALL)
             .border_style(Style::default().fg(Color::Blue))
-            .style(Style::default().bg(Color::Black)),
+            .style(Style::default()),
     );
 
     frame.render_widget(title, center_area);

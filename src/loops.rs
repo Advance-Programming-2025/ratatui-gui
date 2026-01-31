@@ -13,8 +13,20 @@ impl App {
                 GameState::WaitingStart => self.waiting_loop(terminal)?,
                 GameState::Running => self.active_loop(terminal)?,
                 GameState::Paused => self.paused_loop(terminal)?,
+                GameState::Ended => self.end_loop(terminal)?,
             }
         }
+        Ok(())
+    }
+
+    fn end_loop(&mut self, terminal: &mut DefaultTerminal) -> Result<(), String> {
+        // Draw the start screen
+        terminal
+            .draw(|frame| render_ui(self, frame))
+            .map_err(|_| "Error while drawing start screen")?;
+
+        // Wait for user input (Start or Quit)
+        handle_game_state(self)?;
         Ok(())
     }
 
@@ -53,7 +65,11 @@ impl App {
             // --- 4. TICK LOGICA (Eventi Spaziali) ---
             if self.last_tick.elapsed() >= self.tick_rate {
                 self.get_game_info();
-                self.orchestrator.send_sunray_or_asteroid()?;
+                //Questa funzione ritorna un errore se non ci sono più pianeti vivi
+                if self.orchestrator.send_sunray_or_asteroid() == Err("No more planets alive".to_string()){
+                    self.gamestate = GameState::Ended;
+                }
+                
                 self.last_tick = Instant::now();
             }
 
