@@ -1,15 +1,15 @@
-mod log;
 mod explorers;
-mod planets;
 mod global;
 mod instructions;
+mod log;
+mod planets;
 
 use ratatui::{
     Frame,
-    layout::{Alignment, Constraint, Direction, Layout, Rect},
+    layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, Paragraph},
+    widgets::{Block, Paragraph},
 };
 
 use crate::app::App;
@@ -19,8 +19,8 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
     let outer_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(3),  // Global variables
-            Constraint::Fill(1),    // Main content
+            Constraint::Length(3), // Global variables
+            Constraint::Fill(1),   // Main content
         ])
         .split(frame.area());
 
@@ -28,8 +28,8 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
     let main_layout = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([
-            Constraint::Percentage(40),  // Left column (Explorers + Planets)
-            Constraint::Percentage(60),  // Right column (Extra + Instructions)
+            Constraint::Percentage(40), // Left column (Explorers + Planets)
+            Constraint::Percentage(60), // Right column (Extra + Instructions)
         ])
         .split(outer_layout[1]);
 
@@ -37,8 +37,8 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
     let left_column = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(6),   // Explorers (max 2, compatti)
-            Constraint::Fill(1),     // Planets (scrollabile)
+            Constraint::Length(6), // Explorers (max 2, compatti)
+            Constraint::Fill(1),   // Planets (scrollabile)
         ])
         .split(main_layout[0]);
 
@@ -46,13 +46,13 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
     let right_column = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Percentage(60),  // Extra info
-            Constraint::Percentage(40),  // Instructions
+            Constraint::Percentage(60), // Extra info
+            Constraint::Percentage(40), // Instructions
         ])
         .split(main_layout[1]);
 
     /////////// RENDERING SECTIONS //////////////////
-    
+
     // 1. Global variables (top)
     global::render_globals_info(app, frame, outer_layout[0]);
 
@@ -63,7 +63,7 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
     planets::render_planets_table(app, frame, left_column[1]);
 
     // 4. Extra Info (top right)
-    render_extra_info(app, frame, right_column[0]);
+    render_extra_info_planet(app, frame, right_column[0]);
 
     // 5. Instructions (bottom right)
     instructions::render_instructions(app, frame, right_column[1]);
@@ -73,27 +73,42 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
         log::render_log_overlay(app, frame, main_layout[1]);
     }
 }
-fn render_extra_info(app: &App, frame: &mut Frame, area: Rect) {
+
+fn render_extra_info_planet(app: &App, frame: &mut Frame, area: Rect) {
     let text = vec![
         Line::from(""),
         Line::from(Span::styled(
-            "  Extra Stats & Info",
-            Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD),
+            "  Select Entity",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
         )),
         Line::from(""),
         Line::from(vec![
-            Span::styled("  Selected Planet: ", Style::default().fg(Color::Gray)),
+            Span::styled("  Name Planet: ", Style::default().fg(Color::Gray)),
             Span::styled(
-                format!("{}", app.planet_id_selector.map_or("None".to_string(), |id| id.to_string())),
-                Style::default().fg(Color::White).add_modifier(Modifier::BOLD),
+                format!("{}", app.get_name_selected_planet()),
+                Style::default()
+                    .fg(Color::White)
+                    .add_modifier(Modifier::BOLD),
             ),
         ]),
         Line::from(""),
         Line::from(vec![
-            Span::styled("  Log Overlay: ", Style::default().fg(Color::Gray)),
+            Span::styled("  Planet ID: ", Style::default().fg(Color::Gray)),
+            Span::styled(app.get_id_selected_planet(), Style::default()),
+        ]),
+        Line::from(""),
+        Line::from(vec![
+            Span::styled("  Charged Cells: ", Style::default().fg(Color::Gray)),
+            Span::styled(app.get_cells_info_selected_planet(), Style::default()),
+        ]),
+        Line::from(""),
+        Line::from(vec![
+            Span::styled("  Rocket: ", Style::default().fg(Color::Gray)),
             Span::styled(
-                if app.show_log_overlay { "ON" } else { "OFF" },
-                Style::default().fg(if app.show_log_overlay { Color::Green } else { Color::Red }).add_modifier(Modifier::BOLD),
+                format!("{}", app.get_rocket_of_selected_planet()),
+                Style::default(),
             ),
         ]),
     ];

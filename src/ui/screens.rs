@@ -8,7 +8,10 @@ use ratatui::{
 
 use crate::app::App;
 
-/// Render the starting screen with title and instructions
+/// Renders the starting screen with title and instructions
+///
+/// Shows the game title "One Million Crabs Galaxy" and prompts
+/// to press ENTER to start or Q to quit
 pub fn render_start_screen(app: &App, frame: &mut Frame) {
     let area = frame.area();
 
@@ -33,7 +36,7 @@ pub fn render_start_screen(app: &App, frame: &mut Frame) {
 
     let center_area = horizontal_layout[1];
 
-    // Title and ASCII art
+    // Title and control instructions
     let title_text = vec![
         Line::from(Span::styled(
             "   ONE MILLION CRABS GALAXY       ",
@@ -79,89 +82,4 @@ pub fn render_start_screen(app: &App, frame: &mut Frame) {
     );
 
     frame.render_widget(title, center_area);
-}
-
-/// Render a pause overlay on top of the existing UI
-pub fn render_pause_overlay(app: &App, frame: &mut Frame) {
-    let area = frame.area();
-
-    // Create a centered overlay
-    let vertical_layout = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Percentage(40),
-            Constraint::Percentage(20),
-            Constraint::Percentage(40),
-        ])
-        .split(area);
-
-    let horizontal_layout = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage(30),
-            Constraint::Percentage(40),
-            Constraint::Percentage(30),
-        ])
-        .split(vertical_layout[1]);
-
-    let overlay_area = horizontal_layout[1];
-
-    let pause_text = vec![
-        Line::from(""),
-        Line::from(Span::styled(
-            "      ╔══════════════════════╗",
-            Style::default()
-                .fg(Color::Yellow)
-                .add_modifier(Modifier::BOLD),
-        )),
-        Line::from(Span::styled(
-            "      ║                      ║",
-            Style::default()
-                .fg(Color::Yellow)
-                .add_modifier(Modifier::BOLD),
-        )),
-        Line::from(Span::styled(
-            "      ║    ⏸  PAUSED  ⏸     ║",
-            Style::default()
-                .fg(Color::Yellow)
-                .add_modifier(Modifier::BOLD),
-        )),
-        Line::from(Span::styled(
-            "      ║                      ║",
-            Style::default()
-                .fg(Color::Yellow)
-                .add_modifier(Modifier::BOLD),
-        )),
-        Line::from(Span::styled(
-            "      ╚══════════════════════╝",
-            Style::default()
-                .fg(Color::Yellow)
-                .add_modifier(Modifier::BOLD),
-        )),
-        Line::from(""),
-        Line::from(vec![
-            Span::styled("         Press ", Style::default().fg(Color::Gray)),
-            Span::styled(
-                "P",
-                Style::default()
-                    .fg(Color::Green)
-                    .add_modifier(Modifier::BOLD),
-            ),
-            Span::styled(" to Resume", Style::default().fg(Color::Gray)),
-        ]),
-        Line::from(""),
-    ];
-
-    let pause_overlay = Paragraph::new(pause_text).alignment(Alignment::Left).block(
-        Block::default()
-            .borders(Borders::ALL)
-            .border_style(
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-            )
-            .style(Style::default().bg(Color::Black)),
-    );
-
-    frame.render_widget(pause_overlay, overlay_area);
 }

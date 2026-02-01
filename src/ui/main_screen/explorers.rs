@@ -3,7 +3,7 @@ use ratatui::{
     Frame,
     layout::{Constraint, Rect},
     style::{Color, Modifier, Style},
-    widgets::{Block, Cell, Paragraph, Row, Table},
+    widgets::{Block, Cell, Row, Table},
 };
 
 use crate::app::App;
@@ -61,7 +61,11 @@ pub fn render_explorers(app: &App, frame: &mut Frame, area: Rect) {
         ],
     )
     .header(header)
-    .block(Block::bordered().title(" Explorers ").border_style(Style::default().fg(Color::LightRed)));
+    .block(
+        Block::bordered()
+            .title(" Explorers ")
+            .border_style(Style::default().fg(Color::LightRed)),
+    );
 
     frame.render_widget(table, area);
 }

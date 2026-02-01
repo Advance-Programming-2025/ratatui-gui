@@ -22,11 +22,18 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
         .map(|(id, info)| {
             let energy_str = "■".repeat(info.charged_cells_count)
                 + &"□".repeat(info.energy_cells.len() - info.charged_cells_count);
-            // let energy_color = if p.energy == 5 {
-            //     Color::Green
-            // } else {
-            //     Color::White
-            // };
+
+            // Row style: write in Green if it is a neighbours of the selected planet
+            let row_style = match app.table_state.selected() {
+                Some(selected) => {
+                    if app.galaxy_topology[*id as usize][selected] {
+                        Style::default().fg(Color::Green).bold()
+                    } else {
+                        Style::default()
+                    }
+                }
+                None => Style::default(),
+            };
 
             let status = match info.status {
                 Status::Running => "Running",
@@ -34,20 +41,14 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
                 Status::Dead => "Dead",
             };
 
-            let row = Row::new(vec![
+            Row::new(vec![
                 Cell::from(id.to_string()),
                 Cell::from(info.rocket.to_string()),
                 Cell::from(energy_str),
                 Cell::from(status.to_string()),
                 Cell::from("-".to_string()),
-            ]);
-            row
-            // Evidenzia la riga selezionata
-            // if app.planet_id_selector == Some(*id) {
-            //     row.style(Style::default().bg(Color::DarkGray).fg(Color::White))
-            // } else {
-            //     row
-            // }
+            ])
+            .style(row_style)
         })
         .collect();
 
@@ -62,7 +63,11 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
         ],
     )
     .header(header)
-    .block(Block::bordered().title(" Planets ").border_style(Style::default().fg(Color::Green)))
+    .block(
+        Block::bordered()
+            .title(" Planets ")
+            .border_style(Style::default().fg(Color::Green)),
+    )
     // AGGIUNTA: Definiamo lo stile della riga selezionata centralmente
     .row_highlight_style(Style::default().bg(Color::DarkGray).fg(Color::White));
 

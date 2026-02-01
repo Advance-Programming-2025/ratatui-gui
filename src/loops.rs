@@ -1,4 +1,4 @@
-use omc_galaxy::settings::get_sunray_probability;
+use omc_galaxy::settings::{self};
 use ratatui::DefaultTerminal;
 use std::time::{Duration, Instant};
 
@@ -44,19 +44,14 @@ impl App {
 
     /// Loop: tick management and orchestrator
     fn active_loop(&mut self, terminal: &mut DefaultTerminal) -> Result<(), String> {
-        let mut last_frame = Instant::now();
-
         while !self.exit && self.gamestate == GameState::Running {
             // --- 1. INPUT UTENTE (PRIMA DI TUTTO per massima reattività) ---
             handle_game_state(self)?;
 
             // --- 2. DISEGNO (Solo se è passato il tempo del frame_rate) ---
-            if last_frame.elapsed() >= self.frame_rate {
-                terminal
-                    .draw(|frame| render_ui(self, frame))
-                    .map_err(|_| "Error drawing UI")?;
-                last_frame = Instant::now();
-            }
+            terminal
+                .draw(|frame| render_ui(self, frame))
+                .map_err(|_| "Error drawing UI")?;
 
             // --- 3. GESTIONE MESSAGGI (Continua) ---
             // Processiamo piccoli batch ad ogni iterazione del loop
@@ -66,10 +61,12 @@ impl App {
             if self.last_tick.elapsed() >= self.tick_rate {
                 self.get_game_info();
                 //Questa funzione ritorna un errore se non ci sono più pianeti vivi
-                if self.orchestrator.send_sunray_or_asteroid() == Err("No more planets alive".to_string()){
+                if self.orchestrator.send_sunray_or_asteroid()
+                    == Err("No more planets alive".to_string())
+                {
                     self.gamestate = GameState::Ended;
                 }
-                
+
                 self.last_tick = Instant::now();
             }
 
@@ -82,7 +79,8 @@ impl App {
 
     fn get_game_info(&mut self) {
         self.planets_info = self.orchestrator.get_planets_info();
-        self.probability_sunray = get_sunray_probability();
+        self.probability_sunray = settings::get_sunray_probability();
+        self.galaxy_topology = self.orchestrator.get_galaxy_topology();
     }
 
     /// Pause loop: only consume UI messages, time frozen
