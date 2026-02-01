@@ -1,8 +1,7 @@
-use omc_galaxy::{Orchestrator, PlanetInfoMap, utils::ExplorerInfoMap};
+use omc_galaxy::{Orchestrator, PlanetInfoMap, PlanetStatus, Status, utils::ExplorerInfoMap};
 use ratatui::widgets::TableState;
 use std::{
-    sync::Arc,
-    time::{Duration, Instant},
+    collections::{VecDeque}, sync::Arc, time::{Duration, Instant}
 };
 
 use crate::{game_state::GameState, tui_loggers::LogBuffer};
@@ -12,15 +11,16 @@ pub struct App {
     //State of the game
     pub(crate) gamestate: GameState,
     //Data about the game
-    pub(crate) orchestrator: Orchestrator,
     pub(crate) planets_info: PlanetInfoMap, //Planet Info
     pub(crate) explorers_info: ExplorerInfoMap,
-    pub(crate) probability_sunray: u32,
+    pub(crate) sunray_rate: u32,
     pub(crate) galaxy_topology: Vec<Vec<bool>>, // Esempio: ID pianeta -> Vicini
+    pub(crate) incoming_sunray_asteroids_queue: VecDeque<(u32, bool)>,
+    pub(crate) orchestrator: Orchestrator,
 
     //UI speed
     pub(crate) exit: bool,
-    pub(crate) tick_rate: Duration,
+    pub(crate) send_rate: Duration,
     pub(crate) last_tick: Instant,
     pub(crate) frame_rate: Duration, // Useful not to overload the CPU
 
@@ -41,12 +41,13 @@ impl App {
             planets_info: orchestrator.get_planets_info(),
             explorers_info: orchestrator.get_explorer_states(),
             galaxy_topology: orchestrator.get_galaxy_topology(),
+            incoming_sunray_asteroids_queue: VecDeque::new(),
             orchestrator,
-            probability_sunray: settings::get_sunray_probability(),
+            sunray_rate: settings::get_sunray_probability(),
 
             exit: false,
             last_tick: Instant::now(),
-            tick_rate: Duration::from_millis(500),
+            send_rate: Duration::from_millis(1000),
             frame_rate: Duration::from_millis(33), // UI fluida a 30 FPS
             log_entries: log_buffer,
 
@@ -63,6 +64,12 @@ impl App {
     pub fn set_game_state(&mut self, state: GameState) {
         self.gamestate = state;
     }
+    pub(crate) fn get_game_info(&mut self) {
+        self.planets_info = self.orchestrator.get_planets_info();
+        self.explorers_info = self.orchestrator.get_explorer_states();
+        self.sunray_rate = settings::get_sunray_probability();
+        self.galaxy_topology = self.orchestrator.get_galaxy_topology();
+    }
 
     pub fn initialize_by_file(&mut self) -> Result<(), String> {
         // Load env
@@ -75,14 +82,16 @@ impl App {
         self.orchestrator
             .initialize_galaxy_by_file(file_path.as_str().trim())
             .map_err(|_| "Failed to initialize galaxy")?;
+
+        self.get_game_info();
         Ok(())
     }
 
     pub(crate) fn set_sunray_increment(&mut self) {
-        settings::set_sunray_probability(self.probability_sunray + 1);
+        settings::set_sunray_probability(self.sunray_rate + 5);
     }
     pub(crate) fn set_sunray_decrement(&mut self) {
-        settings::set_sunray_probability(self.probability_sunray - 1);
+        settings::set_sunray_probability(self.sunray_rate - 5);
     }
 }
 
@@ -168,4 +177,45 @@ impl App {
             "None".to_string()
         }
     }
+
+    // pub(crate) fn get_incoming_sunray_asteroids_selected_planet(&self)->String{
+    //     if let Some(planet) = self.table_state.selected() {
+    //         format!(
+    //             "{}",
+    //             match self.incoming_sunray_asteroids.get(&(planet as u32)){
+    //                 Some(value)=>value.to_string(),
+    //                 None=>planet.to_string()
+    //             }
+    //         )
+    //     } else {
+    //         "None".to_string()
+    //     }
+    // }
+}
+
+// Handler sunray asteroid send
+impl App{
+    pub(crate) fn add_incoming_sunray_asteroid(&mut self)->Result<(), String>{
+
+        let planet_id = self.orchestrator.get_random_planet_id()?;
+        let is_sunray = settings::does_sunray_spawn();
+        self.incoming_sunray_asteroids_queue.push_back((planet_id, is_sunray));
+        
+        Ok(())
+    }
+
+    pub(crate) fn pop_incoming_sunray_asteroid(&mut self)->Option<(u32, bool)>{
+        self.incoming_sunray_asteroids_queue.pop_front()
+    }
+
+    pub(crate) fn find_incoming_sunray_asteroid_for_planet(&self, planet_id:u32)->Vec<bool>{
+        let mut vec = Vec::new();
+        for (id, is_sunray)in  &self.incoming_sunray_asteroids_queue{
+            if planet_id == *id{
+                vec.push(*is_sunray);
+            }
+        }
+        vec
+    }
+
 }

@@ -53,7 +53,7 @@ pub fn render_globals_info(app: &App, frame: &mut Frame, area: Rect) {
         Span::styled(" | ", Style::default().fg(Color::Gray)),
         Span::styled("Sunray%: ", Style::default().fg(Color::Gray)),
         Span::styled(
-            format!("{}%", app.probability_sunray),
+            format!("{}%", app.sunray_rate),
             Style::default()
                 .fg(Color::White)
                 .add_modifier(Modifier::BOLD),
