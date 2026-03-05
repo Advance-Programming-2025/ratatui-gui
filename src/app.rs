@@ -1,4 +1,4 @@
-use omc_galaxy::{Orchestrator, PlanetInfoMap, PlanetStatus, Status, utils::ExplorerInfoMap};
+use omc_galaxy::{Orchestrator, PlanetInfoMap, utils::ExplorerInfoMap};
 use ratatui::widgets::TableState;
 use std::{
     collections::{VecDeque}, sync::Arc, time::{Duration, Instant}
@@ -69,6 +69,7 @@ impl App {
         self.explorers_info = self.orchestrator.get_explorer_states();
         self.sunray_rate = settings::get_sunray_probability();
         self.galaxy_topology = self.orchestrator.get_galaxy_topology();
+        self.explorers_info = self.orchestrator.get_explorer_states();
     }
 
     pub fn initialize_by_file(&mut self) -> Result<(), String> {

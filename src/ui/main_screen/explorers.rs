@@ -24,7 +24,33 @@ pub fn render_explorers(app: &App, frame: &mut Frame, area: Rect) {
                 Status::Paused => "Paused",
                 Status::Dead => "Dead",
             };
-            let bag = "[ ]".repeat(5);
+            let mut bag= String::new();
+            for i in info.bag.iter(){
+                if i.is_aipartner(){
+                    bag += "[AP]";
+                }else if i.is_carbon() {
+                    bag += "[C]";
+                }else if i.is_diamond() {
+                    bag += "[D]";
+                }else if i.is_dolphin() {
+                    bag += "[DP]";
+                }else if i.is_hydrogen() {
+                    bag += "[H]";
+                }else if i.is_life() {
+                    bag += "[L]";
+                }else if i.is_oxygen(){
+                    bag += "[O]";
+                }else if i.is_robot(){
+                    bag += "[R]";
+                }else if i.is_silicon() {
+                    bag += "[S]";
+                }else if i.is_water() {
+                    bag += "[W]";
+                }else{
+                    bag += "[?]";
+                }
+            }
+
             let planet_id = info.current_planet_id.to_string();
 
             Row::new(vec![
@@ -35,20 +61,7 @@ pub fn render_explorers(app: &App, frame: &mut Frame, area: Rect) {
             ])
         })
         .collect();
-    // let items: Vec<ListItem> = app
-    //     .explorers
-    //     .iter()
-    //     .map(|e| {
-    //         let mut inv = String::new();
-    //         for i in 0..5 {
-    //             inv.push_str(if i < e.inventory.len() { "[X]" } else { "[ ]" });
-    //         }
-    //         ListItem::new(format!(
-    //             "Explorer {} @ {} | Inventory: {}",
-    //             e.id, e.pos, inv
-    //         ))
-    //     })
-    //     .collect();
+
 
     let table = Table::new(
         rows,
