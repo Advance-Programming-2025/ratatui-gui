@@ -24,29 +24,29 @@ pub fn render_explorers(app: &App, frame: &mut Frame, area: Rect) {
                 Status::Paused => "Paused",
                 Status::Dead => "Dead",
             };
-            let mut bag= String::new();
-            for i in info.bag.iter(){
-                if i.is_aipartner(){
+            let mut bag = String::new();
+            for i in info.bag.iter() {
+                if i.is_aipartner() {
                     bag += "[AP]";
-                }else if i.is_carbon() {
+                } else if i.is_carbon() {
                     bag += "[C]";
-                }else if i.is_diamond() {
+                } else if i.is_diamond() {
                     bag += "[D]";
-                }else if i.is_dolphin() {
+                } else if i.is_dolphin() {
                     bag += "[DP]";
-                }else if i.is_hydrogen() {
+                } else if i.is_hydrogen() {
                     bag += "[H]";
-                }else if i.is_life() {
+                } else if i.is_life() {
                     bag += "[L]";
-                }else if i.is_oxygen(){
+                } else if i.is_oxygen() {
                     bag += "[O]";
-                }else if i.is_robot(){
+                } else if i.is_robot() {
                     bag += "[R]";
-                }else if i.is_silicon() {
+                } else if i.is_silicon() {
                     bag += "[S]";
-                }else if i.is_water() {
+                } else if i.is_water() {
                     bag += "[W]";
-                }else{
+                } else {
                     bag += "[?]";
                 }
             }
@@ -61,7 +61,6 @@ pub fn render_explorers(app: &App, frame: &mut Frame, area: Rect) {
             ])
         })
         .collect();
-
 
     let table = Table::new(
         rows,

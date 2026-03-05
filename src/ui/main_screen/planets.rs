@@ -41,10 +41,11 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
                 Status::Dead => "Dead",
             };
 
-            let incoming: String = app.find_incoming_sunray_asteroid_for_planet(*id)
-            .iter()
-            .map(|&is_sunray| if is_sunray { 'S' } else { 'A' })
-            .collect();
+            let incoming: String = app
+                .find_incoming_sunray_asteroid_for_planet(*id)
+                .iter()
+                .map(|&is_sunray| if is_sunray { 'S' } else { 'A' })
+                .collect();
 
             Row::new(vec![
                 Cell::from(id.to_string()),

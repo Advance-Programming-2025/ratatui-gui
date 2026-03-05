@@ -1,7 +1,9 @@
 use omc_galaxy::{Orchestrator, PlanetInfoMap, utils::ExplorerInfoMap};
 use ratatui::widgets::TableState;
 use std::{
-    collections::{VecDeque}, sync::Arc, time::{Duration, Instant}
+    collections::VecDeque,
+    sync::Arc,
+    time::{Duration, Instant},
 };
 
 use crate::{game_state::GameState, tui_loggers::LogBuffer};
@@ -195,28 +197,27 @@ impl App {
 }
 
 // Handler sunray asteroid send
-impl App{
-    pub(crate) fn add_incoming_sunray_asteroid(&mut self)->Result<(), String>{
-
+impl App {
+    pub(crate) fn add_incoming_sunray_asteroid(&mut self) -> Result<(), String> {
         let planet_id = self.orchestrator.get_random_planet_id()?;
         let is_sunray = settings::does_sunray_spawn();
-        self.incoming_sunray_asteroids_queue.push_back((planet_id, is_sunray));
-        
+        self.incoming_sunray_asteroids_queue
+            .push_back((planet_id, is_sunray));
+
         Ok(())
     }
 
-    pub(crate) fn pop_incoming_sunray_asteroid(&mut self)->Option<(u32, bool)>{
+    pub(crate) fn pop_incoming_sunray_asteroid(&mut self) -> Option<(u32, bool)> {
         self.incoming_sunray_asteroids_queue.pop_front()
     }
 
-    pub(crate) fn find_incoming_sunray_asteroid_for_planet(&self, planet_id:u32)->Vec<bool>{
+    pub(crate) fn find_incoming_sunray_asteroid_for_planet(&self, planet_id: u32) -> Vec<bool> {
         let mut vec = Vec::new();
-        for (id, is_sunray)in  &self.incoming_sunray_asteroids_queue{
-            if planet_id == *id{
+        for (id, is_sunray) in &self.incoming_sunray_asteroids_queue {
+            if planet_id == *id {
                 vec.push(*is_sunray);
             }
         }
         vec
     }
-
 }
