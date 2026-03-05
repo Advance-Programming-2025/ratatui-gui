@@ -8,7 +8,7 @@ use ratatui::{
 
 use crate::app::App;
 
-pub(crate) fn render_instructions(app: &App, frame: &mut Frame, area: Rect) {
+pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect) {
     let text = vec![
         Line::from(""),
         Line::from(vec![

@@ -1,4 +1,3 @@
-use omc_galaxy::settings::{self};
 use ratatui::DefaultTerminal;
 use std::time::{Duration, Instant};
 
