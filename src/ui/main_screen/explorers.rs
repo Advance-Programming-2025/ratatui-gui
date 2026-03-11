@@ -65,11 +65,10 @@ pub fn render_explorers(app: &App, frame: &mut Frame, area: Rect) {
     let table = Table::new(
         rows,
         [
-            Constraint::Length(4),
-            Constraint::Min(7),
-            Constraint::Min(7),
-            Constraint::Min(7),
-            Constraint::Min(7),
+            Constraint::Length(3),
+            Constraint::Length(7),
+            Constraint::Fill(3),
+            Constraint::Fill(2),
         ],
     )
     .header(header)

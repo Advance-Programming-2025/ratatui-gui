@@ -23,48 +23,50 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
     // Very short timeout for responsive input
     if event::poll(Duration::from_millis(5)).map_err(|_| "Polling error")? {
         if let Event::Key(key) = event::read().map_err(|_| "Reading events error")? {
-            match (key.code, app.get_game_state()) {
-                // Global events - respond immediately on key press
-                (KeyCode::Char('q'), _) => {
-                    app.exit = true;
-                }
-                (KeyCode::Enter, GameState::WaitingStart) => {
-                    let mattia_explorers = vec![(0, 0)];
-                    let tommy_explorers = vec![(1, 1)];
-                    app.orchestrator
-                        .start_all(&mattia_explorers, &tommy_explorers)?;
-                    app.set_game_state(GameState::Running);
-                }
-                (KeyCode::Char('p'), GameState::Running) => {
-                    app.orchestrator.stop_all()?;
-                    app.set_game_state(GameState::Paused);
-                }
-                (KeyCode::Char('p'), GameState::Paused) => {
-                    app.orchestrator.restart_all()?;
-                    app.set_game_state(GameState::Running);
-                }
-                (KeyCode::Up, _) => app.set_sunray_increment(),
-                (KeyCode::Down, _) => app.set_sunray_decrement(),
+            if key.kind == event::KeyEventKind::Press {
+                match (key.code, app.get_game_state()) {
+                    // Global events - respond immediately on key press
+                    (KeyCode::Char('q'), _) => {
+                        app.exit = true;
+                    }
+                    (KeyCode::Enter, GameState::WaitingStart) => {
+                        let mattia_explorers = vec![(0, 0)];
+                        let tommy_explorers = vec![(1, 1)];
+                        app.orchestrator
+                            .start_all(&mattia_explorers, &tommy_explorers)?;
+                        app.set_game_state(GameState::Running);
+                    }
+                    (KeyCode::Char('p'), GameState::Running) => {
+                        app.orchestrator.stop_all()?;
+                        app.set_game_state(GameState::Paused);
+                    }
+                    (KeyCode::Char('p'), GameState::Paused) => {
+                        app.orchestrator.restart_all()?;
+                        app.set_game_state(GameState::Running);
+                    }
+                    (KeyCode::Up, _) => app.set_sunray_increment(),
+                    (KeyCode::Down, _) => app.set_sunray_decrement(),
 
-                // Navigation events
-                (KeyCode::Char('w'), _) => {
-                    app.decrement_id_selector();
-                }
-                (KeyCode::Char('s'), _) => {
-                    app.increment_id_selector();
-                }
+                    // Navigation events
+                    (KeyCode::Char('w'), _) => {
+                        app.decrement_id_selector();
+                    }
+                    (KeyCode::Char('s'), _) => {
+                        app.increment_id_selector();
+                    }
 
-                // Toggle log overlay with 'L'
-                (KeyCode::Char('l'), _) => {
-                    app.show_log_overlay = !app.show_log_overlay;
-                }
+                    // Toggle log overlay with 'L'
+                    (KeyCode::Char('l'), _) => {
+                        app.show_log_overlay = !app.show_log_overlay;
+                    }
 
-                // Restart game when ended
-                (KeyCode::Char('r'), GameState::Ended) => {
-                    app.set_game_state(GameState::WaitingStart);
-                    // TODO: Add orchestrator reset function
+                    // Restart game when ended
+                    (KeyCode::Char('r'), GameState::Ended) => {
+                        app.set_game_state(GameState::WaitingStart);
+                        // TODO: Add orchestrator reset function
+                    }
+                    _ => {}
                 }
-                _ => {}
             }
         }
     }
