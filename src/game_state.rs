@@ -1,6 +1,6 @@
 use crate::app::App;
 use crossterm::event::{self, Event, KeyCode};
-use std::time::Duration;
+use std::{thread::sleep, time::Duration};
 
 /// Represents the different states the game can be in
 #[derive(Clone, PartialEq, Debug)]
@@ -21,7 +21,7 @@ pub enum GameState {
 /// Only processes Press events to avoid key repeat issues.
 pub fn handle_game_state(app: &mut App) -> Result<(), String> {
     // Very short timeout for responsive input
-    if event::poll(Duration::from_millis(10)).map_err(|_| "Polling error")? {
+    if event::poll(Duration::from_millis(5)).map_err(|_| "Polling error")? {
         if let Event::Key(key) = event::read().map_err(|_| "Reading events error")? {
             match (key.code, app.get_game_state()) {
                 // Global events - respond immediately on key press
@@ -29,13 +29,18 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                     app.exit = true;
                 }
                 (KeyCode::Enter, GameState::WaitingStart) => {
+                    let mattia_explorers = vec![(0, 0)];
+                    let tommy_explorers = vec![(1, 1)];
+                    app.orchestrator
+                        .start_all(&mattia_explorers, &tommy_explorers)?;
                     app.set_game_state(GameState::Running);
-                    app.orchestrator.start_all()?;
                 }
                 (KeyCode::Char('p'), GameState::Running) => {
+                    app.orchestrator.stop_all()?;
                     app.set_game_state(GameState::Paused);
                 }
                 (KeyCode::Char('p'), GameState::Paused) => {
+                    app.orchestrator.restart_all()?;
                     app.set_game_state(GameState::Running);
                 }
                 (KeyCode::Up, _) => app.set_sunray_increment(),

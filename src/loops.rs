@@ -58,7 +58,8 @@ impl App {
 
             // --- 4. TICK LOGICA (Eventi Spaziali) ---
             if self.last_tick.elapsed() >= self.send_rate {
-                self.get_game_info();
+                self.get_game_info()?; // Aggiorna info da orchestrator
+                self.orchestrator.send_bag_content_request_from_ui()?;
 
                 //Invia o sunray o asteroid in base alla code definita in App
                 match self.pop_incoming_sunray_asteroid() {
@@ -87,20 +88,34 @@ impl App {
 
             // --- 5. RIPOSO (Opzionale ma consigliato) ---
             // Un piccolo sleep per non bruciare la CPU se il loop è troppo veloce
-            std::thread::sleep(Duration::from_millis(1));
+            std::thread::sleep(Duration::from_millis(20));
         }
         Ok(())
     }
 
     /// Pause loop: only consume UI messages, time frozen
     fn paused_loop(&mut self, terminal: &mut DefaultTerminal) -> Result<(), String> {
-        // Draw the pause overlay
-        terminal
-            .draw(|frame| render_ui(self, frame))
-            .map_err(|_| "Error while drawing pause screen")?;
+        while !self.exit && self.gamestate == GameState::Paused {
+            // --- 1. INPUT UTENTE (PRIMA DI TUTTO per massima reattività) ---
+            handle_game_state(self)?;
 
-        // Wait for user input
-        handle_game_state(self)?;
+            // --- 2. DISEGNO (Solo se è passato il tempo del frame_rate) ---
+            terminal
+                .draw(|frame| render_ui(self, frame))
+                .map_err(|_| "Error drawing UI")?;
+
+            // --- 3. GESTIONE MESSAGGI (Continua) ---
+            // Processiamo piccoli batch ad ogni iterazione del loop
+            self.orchestrator.handle_game_messages()?;
+
+            // --- 4. TICK LOGICA (Eventi Spaziali) ---
+            self.get_game_info()?; // Aggiorna info da orchestrator
+
+            // --- 5. RIPOSO (Opzionale ma consigliato) ---
+            // Un piccolo sleep per non bruciare la CPU se il loop è troppo veloce
+            std::thread::sleep(Duration::from_millis(1));
+        }
+
         Ok(())
     }
 }

@@ -26,7 +26,7 @@ fn main() -> Result<(), String> {
     let orchestrator = Orchestrator::new()?;
 
     // Create and run game loop
-    let mut app = App::new(orchestrator, log_buffer);
+    let mut app = App::new(orchestrator, log_buffer)?;
 
     // Initialize by file
     app.initialize_by_file()?;

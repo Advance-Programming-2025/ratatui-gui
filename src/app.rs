@@ -37,8 +37,8 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(orchestrator: Orchestrator, log_buffer: Arc<LogBuffer>) -> Self {
-        Self {
+    pub fn new(orchestrator: Orchestrator, log_buffer: Arc<LogBuffer>) -> Result<Self, String> {
+        Ok(Self {
             gamestate: GameState::WaitingStart,
             planets_info: orchestrator.get_planets_info(),
             explorers_info: orchestrator.get_explorer_states(),
@@ -56,7 +56,7 @@ impl App {
             table_state: TableState::default(),
 
             show_log_overlay: false,
-        }
+        })
     }
 
     pub fn get_game_state(&self) -> GameState {
@@ -66,12 +66,18 @@ impl App {
     pub fn set_game_state(&mut self, state: GameState) {
         self.gamestate = state;
     }
-    pub(crate) fn get_game_info(&mut self) {
+    pub(crate) fn get_game_info(&mut self) -> Result<(), String> {
         self.planets_info = self.orchestrator.get_planets_info();
         self.explorers_info = self.orchestrator.get_explorer_states();
         self.sunray_rate = settings::get_sunray_probability();
         self.galaxy_topology = self.orchestrator.get_galaxy_topology();
-        self.explorers_info = self.orchestrator.get_explorer_states();
+        Ok(())
+    }
+    pub(crate) fn get_game_info_without_explorers(&mut self) -> Result<(), String> {
+        self.planets_info = self.orchestrator.get_planets_info();
+        self.sunray_rate = settings::get_sunray_probability();
+        self.galaxy_topology = self.orchestrator.get_galaxy_topology();
+        Ok(())
     }
 
     pub fn initialize_by_file(&mut self) -> Result<(), String> {
@@ -86,7 +92,7 @@ impl App {
             .initialize_galaxy_by_file(file_path.as_str().trim())
             .map_err(|_| "Failed to initialize galaxy")?;
 
-        self.get_game_info();
+        self.get_game_info_without_explorers()?;
         Ok(())
     }
 
