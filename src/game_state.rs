@@ -49,7 +49,10 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
 
                     // Navigation events
                     (KeyCode::Char('w'), _) => {
-                        match (app.explorer_selector.selected(), app.planet_selector.selected()) {
+                        match (
+                            app.explorer_selector.selected(),
+                            app.planet_selector.selected(),
+                        ) {
                             (Some(_), None) => app.decrement_explorer_selector(),
                             (None, Some(_)) => app.decrement_planet_selector(),
                             (None, None) => app.decrement_planet_selector(),
@@ -57,7 +60,10 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                         }
                     }
                     (KeyCode::Char('s'), _) => {
-                        match (app.explorer_selector.selected(), app.planet_selector.selected()) {
+                        match (
+                            app.explorer_selector.selected(),
+                            app.planet_selector.selected(),
+                        ) {
                             (Some(_), None) => app.increment_explorer_selector(),
                             (None, Some(_)) => app.increment_planet_selector(),
                             (None, None) => app.increment_explorer_selector(),

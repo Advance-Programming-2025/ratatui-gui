@@ -108,11 +108,11 @@ impl App {
 
 // Selector for the planet table
 impl App {
-    pub (crate) fn enable_planet_selector(&mut self)->bool {
+    pub(crate) fn enable_planet_selector(&mut self) -> bool {
         if self.planets_info.len() > 0 {
             self.planet_selector.select(Some(0));
             true
-        }else{
+        } else {
             false
         }
     }
@@ -125,7 +125,7 @@ impl App {
         let i = match self.planet_selector.selected() {
             Some(i) => {
                 if i >= n - 1 {
-                    n - 1 
+                    n - 1
                 } else {
                     i + 1
                 }
@@ -155,7 +155,7 @@ impl App {
             }
             None => n - 1,
         };
-        if i!=n{
+        if i != n {
             self.planet_selector.select(Some(i));
         }
     }
@@ -222,11 +222,12 @@ impl App {
 }
 // Selector for the explorer table
 impl App {
-    pub(crate) fn enable_explorer_selector(&mut self)->bool {
+    pub(crate) fn enable_explorer_selector(&mut self) -> bool {
         if self.explorers_info.len() > 0 {
-            self.explorer_selector.select(Some(self.explorers_info.len() - 1));
+            self.explorer_selector
+                .select(Some(self.explorers_info.len() - 1));
             true
-        }else{
+        } else {
             false
         }
     }
@@ -250,7 +251,7 @@ impl App {
             None => 0,
         };
 
-        if i!=n{
+        if i != n {
             self.explorer_selector.select(Some(i));
         }
     }
@@ -280,39 +281,33 @@ impl App {
     }
     pub(crate) fn get_bag_selected_explorer(&self) -> String {
         match self.explorer_selector.selected() {
-            Some(selected) => {
-                match self.explorers_info.get_bag(&(selected as u32)) {
-                    Some(bag) => {
-                        let mut bag_content = String::new();
-                        for cell in bag {
-                            bag_content.push_str(&format!("{:?} ", cell));
-                        }
-                        bag_content
+            Some(selected) => match self.explorers_info.get_bag(&(selected as u32)) {
+                Some(bag) => {
+                    let mut bag_content = String::new();
+                    for cell in bag {
+                        bag_content.push_str(&format!("{:?} ", cell));
                     }
-                    None => "None".to_string(),
+                    bag_content
                 }
-            }
+                None => "None".to_string(),
+            },
             None => "None".to_string(),
         }
     }
     pub(crate) fn get_planet_selected_explorer(&self) -> String {
         match self.explorer_selector.selected() {
-            Some(selected) => {
-                match self.explorers_info.get_planet(&(selected as u32)) {
-                    Some(planet_id) => format!("{}", planet_id),
-                    None => "None".to_string(),
-                }
-            }
+            Some(selected) => match self.explorers_info.get_planet(&(selected as u32)) {
+                Some(planet_id) => format!("{}", planet_id),
+                None => "None".to_string(),
+            },
             None => "None".to_string(),
         }
     }
     pub(crate) fn get_id_selected_explorer(&self) -> String {
         match self.explorer_selector.selected() {
-            Some(selected) => {
-                match self.explorers_info.get_id(&(selected as u32)) {
-                    Some(id) => format!("{}", id),
-                    None => "None".to_string(),
-                }
+            Some(selected) => match self.explorers_info.get_id(&(selected as u32)) {
+                Some(id) => format!("{}", id),
+                None => "None".to_string(),
             },
             None => format!("None"),
         }

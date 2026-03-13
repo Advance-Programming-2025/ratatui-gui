@@ -46,7 +46,10 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect) {
                     .fg(Color::Cyan)
                     .add_modifier(Modifier::BOLD),
             ),
-            Span::styled("- Select down Explorer/Planet", Style::default().fg(Color::White)),
+            Span::styled(
+                "- Select down Explorer/Planet",
+                Style::default().fg(Color::White),
+            ),
         ]),
         Line::from(vec![
             Span::styled(
