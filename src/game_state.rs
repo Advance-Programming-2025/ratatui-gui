@@ -44,11 +44,11 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                         app.orchestrator.restart_all()?;
                         app.set_game_state(GameState::Running);
                     }
-                    (KeyCode::Up, GameState::Paused) => app.set_sunray_increment(),
-                    (KeyCode::Down, GameState::Paused) => app.set_sunray_decrement(),
+                    (KeyCode::Char('o'), GameState::Paused) => app.set_sunray_increment(),
+                    (KeyCode::Char('i'), GameState::Paused) => app.set_sunray_decrement(),
 
                     // Navigation events
-                    (KeyCode::Char('w'), _) => {
+                    (KeyCode::Up, _) => {
                         match (
                             app.explorer_selector.selected(),
                             app.planet_selector.selected(),
@@ -59,7 +59,7 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                             _ => {}
                         }
                     }
-                    (KeyCode::Char('s'), _) => {
+                    (KeyCode::Down, _) => {
                         match (
                             app.explorer_selector.selected(),
                             app.planet_selector.selected(),
@@ -80,6 +80,24 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                     (KeyCode::Char('r'), GameState::Ended) => {
                         app.set_game_state(GameState::WaitingStart);
                         // TODO: Add orchestrator reset function
+                    }
+                    // Send asteroid with 'A' (for testing)
+                    (KeyCode::Char('a'), GameState::Running)
+                    | (KeyCode::Char('a'), GameState::Paused) => {
+                        match app.planet_selector.selected() {
+                            Some(planet_id) => {
+                                app.add_incoming_asteroid_for_planet(planet_id as u32)
+                            }
+                            None => {}
+                        }
+                    }
+                    // Send sunray with 'S' (for testing)
+                    (KeyCode::Char('s'), GameState::Running)
+                    | (KeyCode::Char('s'), GameState::Paused) => {
+                        match app.planet_selector.selected() {
+                            Some(planet_id) => app.add_incoming_sunray_for_planet(planet_id as u32),
+                            None => {}
+                        }
                     }
                     _ => {}
                 }

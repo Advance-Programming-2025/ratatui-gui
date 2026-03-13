@@ -62,14 +62,16 @@ impl App {
                 self.orchestrator.send_bag_content_request_from_ui()?;
 
                 //Invia o sunray o asteroid in base alla code definita in App
-                match self.pop_incoming_sunray_asteroid() {
-                    Some((planet_id, true)) => {
-                        self.orchestrator.send_sunray_from_gui(vec![planet_id])?
+                loop {
+                    match self.pop_incoming_sunray_asteroid() {
+                        Some((planet_id, true)) => {
+                            self.orchestrator.send_sunray_from_gui(vec![planet_id])?
+                        }
+                        Some((planet_id, false)) => {
+                            self.orchestrator.send_asteroid_from_gui(vec![planet_id])?
+                        }
+                        None => break,
                     }
-                    Some((planet_id, false)) => {
-                        self.orchestrator.send_asteroid_from_gui(vec![planet_id])?
-                    }
-                    None => {}
                 }
                 //Questa funzione ritorna un errore se non ci sono più pianeti vivi
                 // if self.orchestrator.send_sunray_or_asteroid()

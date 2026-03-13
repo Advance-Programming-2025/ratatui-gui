@@ -324,6 +324,14 @@ impl App {
 
         Ok(())
     }
+    pub(crate) fn add_incoming_asteroid_for_planet(&mut self, planet_id: u32) {
+        self.incoming_sunray_asteroids_queue
+            .push_back((planet_id, false));
+    }
+    pub(crate) fn add_incoming_sunray_for_planet(&mut self, planet_id: u32) {
+        self.incoming_sunray_asteroids_queue
+            .push_back((planet_id, true));
+    }
 
     pub(crate) fn pop_incoming_sunray_asteroid(&mut self) -> Option<(u32, bool)> {
         self.incoming_sunray_asteroids_queue.pop_front()

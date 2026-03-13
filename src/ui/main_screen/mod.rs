@@ -63,7 +63,10 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
     planets::render_planets_table(app, frame, left_column[1]);
 
     // 4. Extra Info (top right)
-    match (app.explorer_selector.selected(), app.planet_selector.selected()) {
+    match (
+        app.explorer_selector.selected(),
+        app.planet_selector.selected(),
+    ) {
         (Some(_), None) => render_extra_info_explorer(app, frame, right_column[0]),
         (None, Some(_)) => render_extra_info_planet(app, frame, right_column[0]),
         (None, None) => render_extra_info_none(app, frame, right_column[0]),

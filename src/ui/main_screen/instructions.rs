@@ -29,7 +29,7 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect) {
         ]),
         Line::from(vec![
             Span::styled(
-                "  W ",
+                "  ↑ ",
                 Style::default()
                     .fg(Color::Cyan)
                     .add_modifier(Modifier::BOLD),
@@ -41,7 +41,7 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect) {
         ]),
         Line::from(vec![
             Span::styled(
-                "  S ",
+                "  ↓ ",
                 Style::default()
                     .fg(Color::Cyan)
                     .add_modifier(Modifier::BOLD),
@@ -62,7 +62,7 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect) {
         ]),
         Line::from(vec![
             Span::styled(
-                "  ↑ ",
+                "  O ",
                 Style::default()
                     .fg(Color::Magenta)
                     .add_modifier(Modifier::BOLD),
@@ -71,7 +71,7 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect) {
         ]),
         Line::from(vec![
             Span::styled(
-                "  ↓ ",
+                "  I ",
                 Style::default()
                     .fg(Color::Magenta)
                     .add_modifier(Modifier::BOLD),
