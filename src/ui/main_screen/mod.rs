@@ -63,7 +63,12 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
     planets::render_planets_table(app, frame, left_column[1]);
 
     // 4. Extra Info (top right)
-    render_extra_info_planet(app, frame, right_column[0]);
+    match (app.explorer_selector.selected(), app.planet_selector.selected()) {
+        (Some(_), None) => render_extra_info_explorer(app, frame, right_column[0]),
+        (None, Some(_)) => render_extra_info_planet(app, frame, right_column[0]),
+        (None, None) => render_extra_info_none(app, frame, right_column[0]),
+        _ => {}
+    }
 
     // 5. Instructions (bottom right)
     instructions::render_instructions(app, frame, right_column[1]);
@@ -74,6 +79,62 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
     }
 }
 
+fn render_extra_info_none(app: &App, frame: &mut Frame, area: Rect) {
+    let text = vec![
+        Line::from(""),
+        Line::from(Span::styled(
+            "  No Entity Selected",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        )),
+    ];
+
+    let paragraph = Paragraph::new(text).block(
+        Block::bordered()
+            .title(" Extra Info ")
+            .border_style(Style::default().fg(Color::DarkGray)),
+    );
+    frame.render_widget(paragraph, area);
+}
+fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect) {
+    let text = vec![
+        Line::from(""),
+        Line::from(Span::styled(
+            "  Select Entity",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        )),
+        Line::from(""),
+        Line::from(vec![
+            Span::styled("  ID Explorer: ", Style::default().fg(Color::Gray)),
+            Span::styled(
+                format!("{}", app.get_id_selected_explorer()),
+                Style::default()
+                    .fg(Color::White)
+                    .add_modifier(Modifier::BOLD),
+            ),
+        ]),
+        Line::from(""),
+        Line::from(vec![
+            Span::styled("  Bag: ", Style::default().fg(Color::Gray)),
+            Span::styled(app.get_bag_selected_explorer(), Style::default()),
+        ]),
+        Line::from(""),
+        Line::from(vec![
+            Span::styled("  Current Planet ID: ", Style::default().fg(Color::Gray)),
+            Span::styled(app.get_planet_selected_explorer(), Style::default()),
+        ]),
+    ];
+
+    let paragraph = Paragraph::new(text).block(
+        Block::bordered()
+            .title(" Extra Info ")
+            .border_style(Style::default().fg(Color::DarkGray)),
+    );
+    frame.render_widget(paragraph, area);
+}
 fn render_extra_info_planet(app: &App, frame: &mut Frame, area: Rect) {
     let text = vec![
         Line::from(""),
