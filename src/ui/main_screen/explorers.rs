@@ -8,7 +8,7 @@ use ratatui::{
 
 use crate::app::App;
 
-pub fn render_explorers(app: &App, frame: &mut Frame, area: Rect) {
+pub fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect) {
     let header = Row::new(vec!["ID", "Status", "Bag", "Planet"]).style(
         Style::default()
             .fg(Color::Yellow)
@@ -76,7 +76,8 @@ pub fn render_explorers(app: &App, frame: &mut Frame, area: Rect) {
         Block::bordered()
             .title(" Explorers ")
             .border_style(Style::default().fg(Color::LightRed)),
-    );
+    )
+    .row_highlight_style(Style::default().bg(Color::DarkGray).fg(Color::White));
 
-    frame.render_widget(table, area);
+    frame.render_stateful_widget(table, area, &mut app.explorer_selector);
 }

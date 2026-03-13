@@ -30,7 +30,8 @@ pub struct App {
     pub log_entries: Arc<LogBuffer>,
 
     //UI planet selector variables
-    pub(crate) table_state: TableState,
+    pub(crate) planet_selector: TableState,
+    pub(crate) explorer_selector: TableState,
 
     //UI log overlay toggle
     pub show_log_overlay: bool,
@@ -53,7 +54,8 @@ impl App {
             frame_rate: Duration::from_millis(33), // UI fluida a 30 FPS
             log_entries: log_buffer,
 
-            table_state: TableState::default(),
+            planet_selector: TableState::default(),
+            explorer_selector: TableState::default(),
 
             show_log_overlay: false,
         })
@@ -106,16 +108,24 @@ impl App {
 
 // Selector for the planet table
 impl App {
-    pub(crate) fn increment_id_selector(&mut self) {
+    pub (crate) fn enable_planet_selector(&mut self)->bool {
+        if self.planets_info.len() > 0 {
+            self.planet_selector.select(Some(0));
+            true
+        }else{
+            false
+        }
+    }
+    pub(crate) fn increment_planet_selector(&mut self) {
         let n = self.planets_info.len();
         if n == 0 {
             return;
         }
 
-        let i = match self.table_state.selected() {
+        let i = match self.planet_selector.selected() {
             Some(i) => {
                 if i >= n - 1 {
-                    0
+                    n - 1 
                 } else {
                     i + 1
                 }
@@ -123,30 +133,39 @@ impl App {
             None => 0,
         };
 
-        self.table_state.select(Some(i));
+        self.planet_selector.select(Some(i));
     }
 
-    pub(crate) fn decrement_id_selector(&mut self) {
+    pub(crate) fn decrement_planet_selector(&mut self) {
         let n = self.planets_info.len();
         if n == 0 {
             return;
         }
 
-        let i = match self.table_state.selected() {
+        let i = match self.planet_selector.selected() {
             Some(i) => {
                 if i == 0 {
-                    n - 1
+                    if self.enable_explorer_selector() {
+                        self.disable_planet_selector();
+                    }
+                    n
                 } else {
                     i - 1
                 }
             }
             None => n - 1,
         };
-
-        self.table_state.select(Some(i));
+        if i!=n{
+            self.planet_selector.select(Some(i));
+        }
     }
+
+    pub(crate) fn disable_planet_selector(&mut self) {
+        self.planet_selector.select(None);
+    }
+
     pub(crate) fn get_rocket_of_selected_planet(&self) -> String {
-        match self.table_state.selected() {
+        match self.planet_selector.selected() {
             Some(selected) => {
                 if self.planets_info.get_info(selected as u32).unwrap().rocket {
                     "AVAILABLE".to_string()
@@ -158,7 +177,7 @@ impl App {
         }
     }
     pub(crate) fn get_cells_info_selected_planet(&self) -> String {
-        match self.table_state.selected() {
+        match self.planet_selector.selected() {
             Some(selected) => {
                 let planet = self.planets_info.get_info(selected as u32).unwrap();
                 format!(
@@ -171,13 +190,13 @@ impl App {
         }
     }
     pub(crate) fn get_id_selected_planet(&self) -> String {
-        match self.table_state.selected() {
+        match self.planet_selector.selected() {
             Some(selected) => selected.to_string(),
             None => format!("None"),
         }
     }
     pub(crate) fn get_name_selected_planet(&self) -> String {
-        if let Some(planet) = self.table_state.selected() {
+        if let Some(planet) = self.planet_selector.selected() {
             format!(
                 "{:?}",
                 self.planets_info.get_info(planet as u32).unwrap().name
@@ -188,7 +207,7 @@ impl App {
     }
 
     // pub(crate) fn get_incoming_sunray_asteroids_selected_planet(&self)->String{
-    //     if let Some(planet) = self.table_state.selected() {
+    //     if let Some(planet) = self.planet_selector.selected() {
     //         format!(
     //             "{}",
     //             match self.incoming_sunray_asteroids.get(&(planet as u32)){
@@ -200,6 +219,104 @@ impl App {
     //         "None".to_string()
     //     }
     // }
+}
+// Selector for the explorer table
+impl App {
+    pub(crate) fn enable_explorer_selector(&mut self)->bool {
+        if self.explorers_info.len() > 0 {
+            self.explorer_selector.select(Some(self.explorers_info.len() - 1));
+            true
+        }else{
+            false
+        }
+    }
+    pub(crate) fn increment_explorer_selector(&mut self) {
+        let n = self.explorers_info.len();
+        if n == 0 {
+            return;
+        }
+
+        let i = match self.explorer_selector.selected() {
+            Some(i) => {
+                if i >= n - 1 {
+                    if self.enable_planet_selector() {
+                        self.disable_explorer_selector();
+                    }
+                    n
+                } else {
+                    i + 1
+                }
+            }
+            None => 0,
+        };
+
+        if i!=n{
+            self.explorer_selector.select(Some(i));
+        }
+    }
+
+    pub(crate) fn decrement_explorer_selector(&mut self) {
+        let n = self.explorers_info.len();
+        if n == 0 {
+            return;
+        }
+
+        let i = match self.explorer_selector.selected() {
+            Some(i) => {
+                if i == 0 {
+                    0
+                } else {
+                    i - 1
+                }
+            }
+            None => n - 1,
+        };
+
+        self.explorer_selector.select(Some(i));
+    }
+
+    pub(crate) fn disable_explorer_selector(&mut self) {
+        self.explorer_selector.select(None);
+    }
+    pub(crate) fn get_bag_selected_explorer(&self) -> String {
+        match self.explorer_selector.selected() {
+            Some(selected) => {
+                match self.explorers_info.get_bag(&(selected as u32)) {
+                    Some(bag) => {
+                        let mut bag_content = String::new();
+                        for cell in bag {
+                            bag_content.push_str(&format!("{:?} ", cell));
+                        }
+                        bag_content
+                    }
+                    None => "None".to_string(),
+                }
+            }
+            None => "None".to_string(),
+        }
+    }
+    pub(crate) fn get_planet_selected_explorer(&self) -> String {
+        match self.explorer_selector.selected() {
+            Some(selected) => {
+                match self.explorers_info.get_planet(&(selected as u32)) {
+                    Some(planet_id) => format!("{}", planet_id),
+                    None => "None".to_string(),
+                }
+            }
+            None => "None".to_string(),
+        }
+    }
+    pub(crate) fn get_id_selected_explorer(&self) -> String {
+        match self.explorer_selector.selected() {
+            Some(selected) => {
+                match self.explorers_info.get_id(&(selected as u32)) {
+                    Some(id) => format!("{}", id),
+                    None => "None".to_string(),
+                }
+            },
+            None => format!("None"),
+        }
+    }
 }
 
 // Handler sunray asteroid send

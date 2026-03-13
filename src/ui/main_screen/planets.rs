@@ -24,7 +24,7 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
                 + &"□".repeat(info.energy_cells.len() - info.charged_cells_count);
 
             // Row style: write in Green if it is a neighbours of the selected planet
-            let row_style = match app.table_state.selected() {
+            let row_style = match app.planet_selector.selected() {
                 Some(selected) => {
                     if app.galaxy_topology[*id as usize][selected] {
                         Style::default().fg(Color::Green).bold()
@@ -78,5 +78,5 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
     .row_highlight_style(Style::default().bg(Color::DarkGray).fg(Color::White));
 
     // CAMBIO: Usa render_stateful_widget invece di render_widget
-    frame.render_stateful_widget(table, area, &mut app.table_state);
+    frame.render_stateful_widget(table, area, &mut app.planet_selector);
 }

@@ -35,7 +35,7 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect) {
                     .add_modifier(Modifier::BOLD),
             ),
             Span::styled(
-                "- Select Previous Planet",
+                "- Select up Explorer/Planet",
                 Style::default().fg(Color::White),
             ),
         ]),
@@ -46,7 +46,7 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect) {
                     .fg(Color::Cyan)
                     .add_modifier(Modifier::BOLD),
             ),
-            Span::styled("- Select Next Planet", Style::default().fg(Color::White)),
+            Span::styled("- Select down Explorer/Planet", Style::default().fg(Color::White)),
         ]),
         Line::from(vec![
             Span::styled(

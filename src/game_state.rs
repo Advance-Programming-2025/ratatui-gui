@@ -44,15 +44,25 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                         app.orchestrator.restart_all()?;
                         app.set_game_state(GameState::Running);
                     }
-                    (KeyCode::Up, _) => app.set_sunray_increment(),
-                    (KeyCode::Down, _) => app.set_sunray_decrement(),
+                    (KeyCode::Up, GameState::Paused) => app.set_sunray_increment(),
+                    (KeyCode::Down, GameState::Paused) => app.set_sunray_decrement(),
 
                     // Navigation events
                     (KeyCode::Char('w'), _) => {
-                        app.decrement_id_selector();
+                        match (app.explorer_selector.selected(), app.planet_selector.selected()) {
+                            (Some(_), None) => app.decrement_explorer_selector(),
+                            (None, Some(_)) => app.decrement_planet_selector(),
+                            (None, None) => app.decrement_planet_selector(),
+                            _ => {}
+                        }
                     }
                     (KeyCode::Char('s'), _) => {
-                        app.increment_id_selector();
+                        match (app.explorer_selector.selected(), app.planet_selector.selected()) {
+                            (Some(_), None) => app.increment_explorer_selector(),
+                            (None, Some(_)) => app.increment_planet_selector(),
+                            (None, None) => app.increment_explorer_selector(),
+                            _ => {}
+                        }
                     }
 
                     // Toggle log overlay with 'L'
