@@ -10,3 +10,4 @@ ratatui = "0.30.0"
 omc-galaxy = {git="https://github.com/Advance-Programming-2025/omc-galaxy.git"}
 dotenv = "0.15.0"
 log = "0.4.29"
+common-game = "3.0.0"

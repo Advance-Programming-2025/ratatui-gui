@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use omc_galaxy::Status;
 use ratatui::{
     Frame,
@@ -8,7 +10,7 @@ use ratatui::{
 
 use crate::app::App;
 
-pub fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect) {
+pub(crate) fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect) {
     let header = Row::new(vec!["ID", "Status", "Bag", "Planet"]).style(
         Style::default()
             .fg(Color::Yellow)
@@ -24,32 +26,7 @@ pub fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect) {
                 Status::Paused => "Paused",
                 Status::Dead => "Dead",
             };
-            let mut bag = String::new();
-            for i in info.bag.iter() {
-                if i.is_aipartner() {
-                    bag += "[AP]";
-                } else if i.is_carbon() {
-                    bag += "[C]";
-                } else if i.is_diamond() {
-                    bag += "[D]";
-                } else if i.is_dolphin() {
-                    bag += "[DP]";
-                } else if i.is_hydrogen() {
-                    bag += "[H]";
-                } else if i.is_life() {
-                    bag += "[L]";
-                } else if i.is_oxygen() {
-                    bag += "[O]";
-                } else if i.is_robot() {
-                    bag += "[R]";
-                } else if i.is_silicon() {
-                    bag += "[S]";
-                } else if i.is_water() {
-                    bag += "[W]";
-                } else {
-                    bag += "[?]";
-                }
-            }
+            let bag = App::bag_to_string(&info.bag);
 
             let planet_id = info.current_planet_id.to_string();
 
@@ -68,7 +45,7 @@ pub fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect) {
             Constraint::Length(3),
             Constraint::Length(7),
             Constraint::Fill(3),
-            Constraint::Fill(2),
+            Constraint::Length(7),
         ],
     )
     .header(header)

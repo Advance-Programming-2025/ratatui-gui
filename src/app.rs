@@ -1,7 +1,7 @@
 use omc_galaxy::{Orchestrator, PlanetInfoMap, utils::ExplorerInfoMap};
 use ratatui::widgets::TableState;
 use std::{
-    collections::VecDeque,
+    collections::{HashMap, VecDeque},
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -283,10 +283,7 @@ impl App {
         match self.explorer_selector.selected() {
             Some(selected) => match self.explorers_info.get_bag(&(selected as u32)) {
                 Some(bag) => {
-                    let mut bag_content = String::new();
-                    for cell in bag {
-                        bag_content.push_str(&format!("{:?} ", cell));
-                    }
+                    let bag_content = App::bag_to_string(bag);
                     bag_content
                 }
                 None => "None".to_string(),
@@ -294,6 +291,71 @@ impl App {
             None => "None".to_string(),
         }
     }
+    //Function to convert explorer bag items to string like this e.g 0.C|1.D|0.H|3.S|0.O|0.W|0.L|0.R|0.AP the number before the dot is the quantity of that resource in the bag, and the letter after the dot is the type of resource (C for Carbon, D for Diamond, H for Hydrogen, S for Silicon, O for Oxygen, W for Water, L for Life, R for Robot, AP for AI Partner)
+    pub(crate) fn bag_to_string(
+        bag: &Vec<common_game::components::resource::ResourceType>,
+    ) -> String {
+        //the order of the resources should be the same as teh example above, so we need to iterate over the bag and count the quantity of each resource type, then we can create the string representation of the bag
+        //the keys of the resources should be strings like "C", "D", "H", "S", "O", "W", "L", "Do", "R", "AP" and the values should be the quantity of that resource in the bag
+        //revert this vector of resources into a hashmap of resource type and quantity, then create the string representation of the bag based on the order of the resources in the example above
+        let resource_order = vec!["AP", "R", "Do", "L", "W", "O", "S", "H", "D", "C"];
+        let mut resource_counts: HashMap<&str, u32> = HashMap::new();
+
+        for key in resource_order.iter() {
+            resource_counts.insert(*key, 0);
+        }
+
+        let mut bag_str = String::new();
+
+        for i in bag {
+            if i.is_aipartner() {
+                resource_counts.entry("AP").and_modify(|e| *e += 1);
+            } else if i.is_carbon() {
+                resource_counts.entry("C").and_modify(|e| *e += 1);
+            } else if i.is_diamond() {
+                resource_counts.entry("D").and_modify(|e| *e += 1);
+            } else if i.is_hydrogen() {
+                resource_counts.entry("H").and_modify(|e| *e += 1);
+            } else if i.is_life() {
+                resource_counts.entry("L").and_modify(|e| *e += 1);
+            } else if i.is_oxygen() {
+                resource_counts.entry("O").and_modify(|e| *e += 1);
+            } else if i.is_robot() {
+                resource_counts.entry("R").and_modify(|e| *e += 1);
+            } else if i.is_silicon() {
+                resource_counts.entry("S").and_modify(|e| *e += 1);
+            } else if i.is_water() {
+                resource_counts.entry("W").and_modify(|e| *e += 1);
+            } else if i.is_diamond() {
+                resource_counts.entry("D").and_modify(|e| *e += 1);
+            } else if i.is_dolphin() {
+                resource_counts.entry("Do").and_modify(|e| *e += 1);
+            } else if i.is_hydrogen() {
+                resource_counts.entry("H").and_modify(|e| *e += 1);
+            } else if i.is_life() {
+                resource_counts.entry("L").and_modify(|e| *e += 1);
+            } else if i.is_oxygen() {
+                resource_counts.entry("O").and_modify(|e| *e += 1);
+            } else if i.is_robot() {
+                resource_counts.entry("R").and_modify(|e| *e += 1);
+            } else if i.is_silicon() {
+                resource_counts.entry("S").and_modify(|e| *e += 1);
+            } else if i.is_water() {
+                resource_counts.entry("W").and_modify(|e| *e += 1);
+            } else {
+                resource_counts.entry("?").and_modify(|e| *e += 1);
+            }
+        }
+        for key in resource_order.iter() {
+            let count = resource_counts.get(*key).unwrap_or(&0);
+            if count == &0 {
+                continue; // Skip resources that are not in the bag
+            }
+            bag_str.push_str(&format!("{}.{key}|", count));
+        }
+        bag_str
+    }
+
     pub(crate) fn get_planet_selected_explorer(&self) -> String {
         match self.explorer_selector.selected() {
             Some(selected) => match self.explorers_info.get_planet(&(selected as u32)) {

@@ -67,7 +67,10 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect) {
                     .fg(Color::Magenta)
                     .add_modifier(Modifier::BOLD),
             ),
-            Span::styled("- Increase Sunray %", Style::default().fg(Color::White)),
+            Span::styled(
+                "- Increase Sunray %(pause first)",
+                Style::default().fg(Color::White),
+            ),
         ]),
         Line::from(vec![
             Span::styled(
@@ -76,7 +79,34 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect) {
                     .fg(Color::Magenta)
                     .add_modifier(Modifier::BOLD),
             ),
-            Span::styled("- Decrease Sunray %", Style::default().fg(Color::White)),
+            Span::styled(
+                "- Decrease Sunray %(pause first)",
+                Style::default().fg(Color::White),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled(
+                "  S ",
+                Style::default()
+                    .fg(Color::Magenta)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                "- Send Sunray(select a planet first)",
+                Style::default().fg(Color::White),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled(
+                "  A ",
+                Style::default()
+                    .fg(Color::Magenta)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                "- Send Asteroid(select a planet first)",
+                Style::default().fg(Color::White),
+            ),
         ]),
     ];
 
