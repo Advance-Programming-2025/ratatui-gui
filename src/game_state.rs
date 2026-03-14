@@ -99,6 +99,143 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                             None => {}
                         }
                     }
+                    // Move the explorer to another planet with selecting the explorer and then typing the planet id and press enter
+                    (KeyCode::Enter, GameState::Running) | (KeyCode::Enter, GameState::Paused) => {
+                        if let Some(explorer_id) = app.explorer_selector.selected() {
+                            //type the planet id in the terminal
+                            if let Some(planet_id) = app.planet_typed {
+                                if app.planets_info.contains(&planet_id) {
+                                    app.orchestrator.send_move_explorer_from_gui(explorer_id as u32, planet_id)?;
+                                    app.planet_typed = None;
+                                }else{
+                                    app.planet_typed = None;
+                                }
+                            }
+                        }else{
+                            app.planet_typed = None;
+                        }
+                    }
+                    (KeyCode::Char('1'), _) => {
+                        
+                        app.planet_typed = match app.planet_typed{
+                            Some(num) =>{
+                                if num > (u32::MAX-9)/10{
+                                    None
+                                }else{
+                                    Some(num*10+1)
+                                }
+                            },
+                            None => Some(1),
+                        };
+                    }
+                    (KeyCode::Char('2'), _) => {
+                        app.planet_typed = match app.planet_typed{
+                            Some(num) => {
+                                if num > (u32::MAX-9)/10{
+                                    None
+                                }else{
+                                    Some(num*10+2)
+                                }
+                            },
+                            None => Some(2),
+                        };
+                    }
+                    (KeyCode::Char('3'), _) => {
+                        app.planet_typed = match app.planet_typed{
+                            Some(num) => {
+                                if num > (u32::MAX-9)/10{
+                                    None
+                                }else{
+                                    Some(num*10+3)
+                                }
+                            },
+                            None => Some(3),
+                        };
+                    }
+                    (KeyCode::Char('4'), _) => {
+                        app.planet_typed = match app.planet_typed{
+                            Some(num) => {
+                                if num > (u32::MAX-9)/10{
+                                    None
+                                }else{
+                                    Some(num*10+4)
+                                }
+                            },
+                            None => Some(4),
+                        };
+                    }
+                    (KeyCode::Char('5'), _) => {
+                        app.planet_typed = match app.planet_typed{
+                            Some(num) => {
+                                if num > (u32::MAX-9)/10{
+                                    None
+                                }else{
+                                    Some(num*10+5)
+                                }
+                            },
+                            None => Some(5),
+                        };
+                    }
+                    (KeyCode::Char('6'), _) => {
+                        app.planet_typed = match app.planet_typed{
+                            Some(num) => {
+                                if num > (u32::MAX-9)/10{
+                                    None
+                                }else{
+                                    Some(num*10+6)
+                                }
+                            },
+                            None => Some(6),
+                        };
+                    }
+                    (KeyCode::Char('7'), _) => {
+                        app.planet_typed = match app.planet_typed{
+                            Some(num) => {
+                                if num > (u32::MAX-9)/10{
+                                    None
+                                }else{
+                                    Some(num*10+7)
+                                }
+                            },
+                            None => Some(7),
+                        };
+                    }
+                    (KeyCode::Char('8'), _) => {
+                        app.planet_typed = match app.planet_typed{
+                            Some(num) => {
+                                if num > (u32::MAX-9)/10{
+                                    None
+                                }else{
+                                    Some(num*10+8)
+                                }
+                            },
+                            None => Some(8),
+                        };
+                    }
+                    (KeyCode::Char('9'), _) => {
+                        app.planet_typed = match app.planet_typed{
+                            Some(num) => {
+                                if num > (u32::MAX-9)/10{
+                                    None
+                                }else{
+                                    Some(num*10+9)
+                                }
+                            },
+                            None => Some(9),
+                        };
+                    }
+                    (KeyCode::Char('0'), _) => {
+                        app.planet_typed = match app.planet_typed{
+                            Some(num) => {
+                                if num > (u32::MAX-9)/10{
+                                    None
+                                }else{
+                                    Some(num*10)
+                                }
+                            },
+                            None => Some(0),
+                        };
+                    }
                     _ => {}
                 }
             }

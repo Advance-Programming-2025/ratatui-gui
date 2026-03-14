@@ -92,7 +92,7 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect) {
                     .add_modifier(Modifier::BOLD),
             ),
             Span::styled(
-                "- Send Sunray(select a planet first)",
+                "- Send Sunray(select planet first)",
                 Style::default().fg(Color::White),
             ),
         ]),
@@ -104,7 +104,31 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect) {
                     .add_modifier(Modifier::BOLD),
             ),
             Span::styled(
-                "- Send Asteroid(select a planet first)",
+                "- Send Asteroid(select planet first)",
+                Style::default().fg(Color::White),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled(
+                "  1..9 ",
+                Style::default()
+                    .fg(Color::Magenta)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                "- Type Destination Planet ID(select explorer first)",
+                Style::default().fg(Color::White),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled(
+                "  ENTER ",
+                Style::default()
+                    .fg(Color::Magenta)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                "- Confirm Destination Planet ID",
                 Style::default().fg(Color::White),
             ),
         ]),

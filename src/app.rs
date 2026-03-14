@@ -35,10 +35,11 @@ pub struct App {
 
     //UI log overlay toggle
     pub show_log_overlay: bool,
+    pub planet_typed: Option<u32>,
 }
 
 impl App {
-    pub fn new(orchestrator: Orchestrator, log_buffer: Arc<LogBuffer>) -> Result<Self, String> {
+    pub fn new(mut orchestrator: Orchestrator, log_buffer: Arc<LogBuffer>) -> Result<Self, String> {
         Ok(Self {
             gamestate: GameState::WaitingStart,
             planets_info: orchestrator.get_planets_info(),
@@ -58,6 +59,7 @@ impl App {
             explorer_selector: TableState::default(),
 
             show_log_overlay: false,
+            planet_typed: None,
         })
     }
 
@@ -242,6 +244,7 @@ impl App {
                 if i >= n - 1 {
                     if self.enable_planet_selector() {
                         self.disable_explorer_selector();
+                        self.planet_typed = None;
                     }
                     n
                 } else {
