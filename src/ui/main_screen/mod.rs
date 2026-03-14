@@ -101,7 +101,7 @@ fn render_extra_info_none(app: &App, frame: &mut Frame, area: Rect) {
     frame.render_widget(paragraph, area);
 }
 fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect) {
-    let destination_planet = match app.planet_typed{
+    let destination_planet = match app.planet_typed {
         Some(typed) => typed.to_string(),
         None => "None".to_string(),
     };
@@ -135,11 +135,11 @@ fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect) {
         ]),
         Line::from(""),
         Line::from(vec![
-            Span::styled("  Destination Planet ID(type it): ", Style::default().fg(Color::Gray)),
             Span::styled(
-                format!("{}", destination_planet),
-                Style::default(),
+                "  Destination Planet ID(type it): ",
+                Style::default().fg(Color::Gray),
             ),
+            Span::styled(format!("{}", destination_planet), Style::default()),
         ]),
     ];
 
@@ -151,7 +151,6 @@ fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect) {
     frame.render_widget(paragraph, area);
 }
 fn render_extra_info_planet(app: &App, frame: &mut Frame, area: Rect) {
-    
     let text = vec![
         Line::from(""),
         Line::from(Span::styled(
@@ -188,7 +187,6 @@ fn render_extra_info_planet(app: &App, frame: &mut Frame, area: Rect) {
                 Style::default(),
             ),
         ]),
-        
     ];
 
     let paragraph = Paragraph::new(text).block(
