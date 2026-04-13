@@ -1,7 +1,7 @@
-use omc_galaxy::{Orchestrator, PlanetInfoMap, utils::ExplorerInfoMap};
-use ratatui::widgets::TableState;
+use omc_galaxy::{Orchestrator, PlanetInfoMap, Status, utils::ExplorerInfoMap};
+use ratatui::{widgets::TableState};
 use std::{
-    collections::{HashMap, VecDeque},
+    collections::VecDeque,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -24,7 +24,7 @@ pub struct App {
     pub(crate) exit: bool,
     pub(crate) send_rate: Duration,
     pub(crate) last_tick: Instant,
-    pub(crate) frame_rate: Duration, // Useful not to overload the CPU
+    // pub(crate) frame_rate: Duration, // Useful not to overload the CPU
 
     //Game logs
     pub log_entries: Arc<LogBuffer>,
@@ -36,6 +36,13 @@ pub struct App {
     //UI log overlay toggle
     pub show_log_overlay: bool,
     pub planet_typed: Option<u32>,
+
+    /// Tracks the currently highlighted menu option on the start screen.
+    /// 0 for Random, 1 for Custom.
+    pub(crate) selected_mode: u8,
+
+    /// Stores the user-defined number of planets for Custom mode.
+    pub(crate) custom_planet_count: u32,
 }
 
 impl App {
@@ -52,7 +59,7 @@ impl App {
             exit: false,
             last_tick: Instant::now(),
             send_rate: Duration::from_millis(1000),
-            frame_rate: Duration::from_millis(33), // UI fluida a 30 FPS
+            // frame_rate: Duration::from_millis(33), // UI fluida a 30 FPS
             log_entries: log_buffer,
 
             planet_selector: TableState::default(),
@@ -60,9 +67,14 @@ impl App {
 
             show_log_overlay: false,
             planet_typed: None,
+
+            selected_mode: 0,
+            custom_planet_count: 0,
         })
     }
 
+    /// Synchronizes the local App state with the latest data from the Orchestrator.
+    /// This acts as a thread-safe snapshot for the UI.
     pub fn get_game_state(&self) -> GameState {
         self.gamestate.clone()
     }
@@ -108,10 +120,29 @@ impl App {
     }
 }
 
+//Menù selector
+impl App{
+    /// Cambia la modalità selezionata (0 per Random, 1 per Custom)
+    pub fn toggle_generation_mode(&mut self) {
+        if self.selected_mode == 0 {
+            self.selected_mode = 1;
+        } else {
+            self.selected_mode = 0;
+        }
+    }
+
+    /// Incrementa o decrementa il numero di pianeti per la modalità Custom
+    /// Mantiene il valore in un range ragionevole (es. 1-50)
+    pub fn adjust_custom_planets(&mut self, delta: i32) {
+        let current = self.custom_planet_count as i32;
+        let new_value = (current + delta).clamp(1, 50);
+        self.custom_planet_count = new_value as u32;
+    }
+}
 // Selector for the planet table
 impl App {
     pub(crate) fn enable_planet_selector(&mut self) -> bool {
-        if self.planets_info.len() > 0 {
+        if !self.planets_info.is_empty() {
             self.planet_selector.select(Some(0));
             true
         } else {
@@ -144,21 +175,15 @@ impl App {
             return;
         }
 
-        let i = match self.planet_selector.selected() {
-            Some(i) => {
-                if i == 0 {
-                    if self.enable_explorer_selector() {
-                        self.disable_planet_selector();
-                    }
-                    n
-                } else {
-                    i - 1
+        match self.planet_selector.selected() {
+            Some(0) => {
+                // At top of planet list: jump to explorer selector if available
+                if self.enable_explorer_selector() {
+                    self.disable_planet_selector();
                 }
             }
-            None => n - 1,
-        };
-        if i != n {
-            self.planet_selector.select(Some(i));
+            Some(i) => self.planet_selector.select(Some(i - 1)),
+            None => self.planet_selector.select(Some(n - 1)),
         }
     }
 
@@ -188,13 +213,13 @@ impl App {
                     planet.energy_cells.len()
                 )
             }
-            None => format!("None"),
+            None => "None".to_string(),
         }
     }
     pub(crate) fn get_id_selected_planet(&self) -> String {
         match self.planet_selector.selected() {
             Some(selected) => selected.to_string(),
-            None => format!("None"),
+            None => "None".to_string(),
         }
     }
     pub(crate) fn get_name_selected_planet(&self) -> String {
@@ -207,25 +232,12 @@ impl App {
             "None".to_string()
         }
     }
-
-    // pub(crate) fn get_incoming_sunray_asteroids_selected_planet(&self)->String{
-    //     if let Some(planet) = self.planet_selector.selected() {
-    //         format!(
-    //             "{}",
-    //             match self.incoming_sunray_asteroids.get(&(planet as u32)){
-    //                 Some(value)=>value.to_string(),
-    //                 None=>planet.to_string()
-    //             }
-    //         )
-    //     } else {
-    //         "None".to_string()
-    //     }
-    // }
 }
-// Selector for the explorer table
+
+// Selector methods for explorers
 impl App {
     pub(crate) fn enable_explorer_selector(&mut self) -> bool {
-        if self.explorers_info.len() > 0 {
+        if !self.explorers_info.is_empty() {
             self.explorer_selector
                 .select(Some(self.explorers_info.len() - 1));
             true
@@ -239,23 +251,16 @@ impl App {
             return;
         }
 
-        let i = match self.explorer_selector.selected() {
-            Some(i) => {
-                if i >= n - 1 {
-                    if self.enable_planet_selector() {
-                        self.disable_explorer_selector();
-                        self.planet_typed = None;
-                    }
-                    n
-                } else {
-                    i + 1
+        match self.explorer_selector.selected() {
+            Some(i) if i >= n - 1 => {
+                // At bottom of explorer list: jump to planet selector if available
+                if self.enable_planet_selector() {
+                    self.disable_explorer_selector();
+                    self.planet_typed = None;
                 }
             }
-            None => 0,
-        };
-
-        if i != n {
-            self.explorer_selector.select(Some(i));
+            Some(i) => self.explorer_selector.select(Some(i + 1)),
+            None => self.explorer_selector.select(Some(0)),
         }
     }
 
@@ -265,18 +270,10 @@ impl App {
             return;
         }
 
-        let i = match self.explorer_selector.selected() {
-            Some(i) => {
-                if i == 0 {
-                    0
-                } else {
-                    i - 1
-                }
-            }
-            None => n - 1,
-        };
-
-        self.explorer_selector.select(Some(i));
+        match self.explorer_selector.selected() {
+            Some(0) | None => self.explorer_selector.select(Some(0)),
+            Some(i) => self.explorer_selector.select(Some(i - 1)),
+        }
     }
 
     pub(crate) fn disable_explorer_selector(&mut self) {
@@ -285,84 +282,16 @@ impl App {
     pub(crate) fn get_bag_selected_explorer(&self) -> String {
         match self.explorer_selector.selected() {
             Some(selected) => match self.explorers_info.get_bag(&(selected as u32)) {
-                Some(bag) => {
-                    let bag_content = App::bag_to_string(bag);
-                    bag_content
-                }
+                Some(bag) => bag_to_string(bag),
                 None => "None".to_string(),
             },
             None => "None".to_string(),
         }
     }
-    //Function to convert explorer bag items to string like this e.g 0.C|1.D|0.H|3.S|0.O|0.W|0.L|0.R|0.AP the number before the dot is the quantity of that resource in the bag, and the letter after the dot is the type of resource (C for Carbon, D for Diamond, H for Hydrogen, S for Silicon, O for Oxygen, W for Water, L for Life, R for Robot, AP for AI Partner)
-    pub(crate) fn bag_to_string(
-        bag: &Vec<common_game::components::resource::ResourceType>,
-    ) -> String {
-        //the order of the resources should be the same as teh example above, so we need to iterate over the bag and count the quantity of each resource type, then we can create the string representation of the bag
-        //the keys of the resources should be strings like "C", "D", "H", "S", "O", "W", "L", "Do", "R", "AP" and the values should be the quantity of that resource in the bag
-        //revert this vector of resources into a hashmap of resource type and quantity, then create the string representation of the bag based on the order of the resources in the example above
-        let resource_order = vec!["AP", "R", "Do", "L", "W", "O", "S", "H", "D", "C"];
-        let mut resource_counts: HashMap<&str, u32> = HashMap::new();
-
-        for key in resource_order.iter() {
-            resource_counts.insert(*key, 0);
-        }
-
-        let mut bag_str = String::new();
-
-        for i in bag {
-            if i.is_aipartner() {
-                resource_counts.entry("AP").and_modify(|e| *e += 1);
-            } else if i.is_carbon() {
-                resource_counts.entry("C").and_modify(|e| *e += 1);
-            } else if i.is_diamond() {
-                resource_counts.entry("D").and_modify(|e| *e += 1);
-            } else if i.is_hydrogen() {
-                resource_counts.entry("H").and_modify(|e| *e += 1);
-            } else if i.is_life() {
-                resource_counts.entry("L").and_modify(|e| *e += 1);
-            } else if i.is_oxygen() {
-                resource_counts.entry("O").and_modify(|e| *e += 1);
-            } else if i.is_robot() {
-                resource_counts.entry("R").and_modify(|e| *e += 1);
-            } else if i.is_silicon() {
-                resource_counts.entry("S").and_modify(|e| *e += 1);
-            } else if i.is_water() {
-                resource_counts.entry("W").and_modify(|e| *e += 1);
-            } else if i.is_diamond() {
-                resource_counts.entry("D").and_modify(|e| *e += 1);
-            } else if i.is_dolphin() {
-                resource_counts.entry("Do").and_modify(|e| *e += 1);
-            } else if i.is_hydrogen() {
-                resource_counts.entry("H").and_modify(|e| *e += 1);
-            } else if i.is_life() {
-                resource_counts.entry("L").and_modify(|e| *e += 1);
-            } else if i.is_oxygen() {
-                resource_counts.entry("O").and_modify(|e| *e += 1);
-            } else if i.is_robot() {
-                resource_counts.entry("R").and_modify(|e| *e += 1);
-            } else if i.is_silicon() {
-                resource_counts.entry("S").and_modify(|e| *e += 1);
-            } else if i.is_water() {
-                resource_counts.entry("W").and_modify(|e| *e += 1);
-            } else {
-                resource_counts.entry("?").and_modify(|e| *e += 1);
-            }
-        }
-        for key in resource_order.iter() {
-            let count = resource_counts.get(*key).unwrap_or(&0);
-            if count == &0 {
-                continue; // Skip resources that are not in the bag
-            }
-            bag_str.push_str(&format!("{}.{key}|", count));
-        }
-        bag_str
-    }
-
     pub(crate) fn get_planet_selected_explorer(&self) -> String {
         match self.explorer_selector.selected() {
             Some(selected) => match self.explorers_info.get_planet(&(selected as u32)) {
-                Some(planet_id) => format!("{}", planet_id),
+                Some(planet_id) => planet_id.to_string(),
                 None => "None".to_string(),
             },
             None => "None".to_string(),
@@ -371,12 +300,17 @@ impl App {
     pub(crate) fn get_id_selected_explorer(&self) -> String {
         match self.explorer_selector.selected() {
             Some(selected) => match self.explorers_info.get_id(&(selected as u32)) {
-                Some(id) => format!("{}", id),
+                Some(id) => id.to_string(),
                 None => "None".to_string(),
             },
-            None => format!("None"),
+            None => "None".to_string(),
         }
     }
+}
+
+// Methods for handling both explorer and planet
+impl App{
+
 }
 
 // Handler sunray asteroid send
@@ -403,12 +337,66 @@ impl App {
     }
 
     pub(crate) fn find_incoming_sunray_asteroid_for_planet(&self, planet_id: u32) -> Vec<bool> {
-        let mut vec = Vec::new();
-        for (id, is_sunray) in &self.incoming_sunray_asteroids_queue {
-            if planet_id == *id {
-                vec.push(*is_sunray);
-            }
-        }
-        vec
+        self.incoming_sunray_asteroids_queue
+            .iter()
+            .filter(|(id, _)| *id == planet_id)
+            .map(|(_, is_sunray)| *is_sunray)
+            .collect()
     }
+}
+
+/// Formats a list of resources into a condensed string representation.
+/// Example: "2.AP | 1.C" for 2 Carbon and 1 AI Partner.
+pub(crate) fn bag_to_string(bag: &[common_game::components::resource::ResourceType]) -> String {
+    use std::collections::HashMap;
+
+    // Display order — defines both sort and symbol
+    const RESOURCE_ORDER: &[&str] = &["AP", "R", "Do", "L", "W", "O", "S", "H", "D", "C"];
+
+    let mut counts: HashMap<&str, u32> = RESOURCE_ORDER.iter().map(|k| (*k, 0)).collect();
+
+    for resource in bag {
+        let key = if resource.is_aipartner() {
+            "AP"
+        } else if resource.is_robot() {
+            "R"
+        } else if resource.is_dolphin() {
+            "Do"
+        } else if resource.is_life() {
+            "L"
+        } else if resource.is_water() {
+            "W"
+        } else if resource.is_oxygen() {
+            "O"
+        } else if resource.is_silicon() {
+            "S"
+        } else if resource.is_hydrogen() {
+            "H"
+        } else if resource.is_diamond() {
+            "D"
+        } else if resource.is_carbon() {
+            "C"
+        } else {
+            continue; // unknown resource type — skip silently
+        };
+        *counts.entry(key).or_insert(0) += 1;
+    }
+
+    RESOURCE_ORDER
+        .iter()
+        .filter_map(|key| {
+            let count = counts[*key];
+            if count > 0 {
+                Some(format!("{count}.{key}"))
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("|")
+}
+
+pub(crate) fn get_status_text_color_tuple(status: Status)->String{
+    let status_text = format!("{:?}", status);
+    status_text
 }

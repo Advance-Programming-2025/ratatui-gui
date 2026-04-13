@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use omc_galaxy::Status;
 use ratatui::{
     Frame,
@@ -9,6 +7,7 @@ use ratatui::{
 };
 
 use crate::app::App;
+use crate::app::bag_to_string;
 
 pub(crate) fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect) {
     let header = Row::new(vec!["ID", "Status", "Bag", "Planet"]).style(
@@ -26,7 +25,7 @@ pub(crate) fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect) {
                 Status::Paused => "Paused",
                 Status::Dead => "Dead",
             };
-            let bag = App::bag_to_string(&info.bag);
+            let bag = bag_to_string(&info.bag);
 
             let planet_id = info.current_planet_id.to_string();
 

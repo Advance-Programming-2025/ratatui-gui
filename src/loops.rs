@@ -73,12 +73,6 @@ impl App {
                         None => break,
                     }
                 }
-                //Questa funzione ritorna un errore se non ci sono più pianeti vivi
-                // if self.orchestrator.send_sunray_or_asteroid()
-                //     == Err("No more planets alive".to_string())
-                // {
-                //     self.gamestate = GameState::Ended;
-                // }
 
                 //Aggiungi un asteroid o sunray da inviare
                 if self.add_incoming_sunray_asteroid() == Err("No more planets alive".to_string()) {

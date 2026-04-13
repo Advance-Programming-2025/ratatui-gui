@@ -6,13 +6,8 @@ use ratatui::Frame;
 use crate::app::App;
 use crate::game_state::GameState;
 
-/// Main UI rendering dispatcher
-///
-/// Routes to the appropriate screen based on current game state:
-/// - WaitingStart: Shows start screen
-/// - Running: Shows main game UI
-/// - Paused: Shows main game UI (pause overlay can be added if needed)
-/// - Ended: Shows main game UI with end state
+/// Primary entry point for rendering.
+/// Dispatches the frame to specific screens (Start, Running, Paused) based on GameState.
 pub fn render_ui(app: &mut App, frame: &mut Frame) {
     match app.get_game_state() {
         GameState::WaitingStart => {

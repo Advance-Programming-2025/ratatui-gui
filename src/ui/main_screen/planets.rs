@@ -1,4 +1,4 @@
-use omc_galaxy::Status;
+
 use ratatui::{
     Frame,
     layout::{Constraint, Rect},
@@ -6,10 +6,10 @@ use ratatui::{
     widgets::{Block, Cell, Row, Table},
 };
 
-use crate::app::App;
+use crate::app::{App, get_status_text_color_tuple};
 
 pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
-    let header = Row::new(vec!["ID", "Rocket", "Energy", "Status", "Incoming"]).style(
+    let header = Row::new(vec!["ID", "Status","Rocket", "Energy", "Incoming"]).style(
         Style::default()
             .fg(Color::Yellow)
             .add_modifier(Modifier::BOLD),
@@ -23,23 +23,27 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
             let energy_str = "■".repeat(info.charged_cells_count)
                 + &"□".repeat(info.energy_cells.len() - info.charged_cells_count);
 
-            // Row style: write in Green if it is a neighbours of the selected planet
-            let row_style = match app.planet_selector.selected() {
-                Some(selected) => {
-                    if app.galaxy_topology[*id as usize][selected] {
-                        Style::default().fg(Color::Green).bold()
+            // Row style: write in Red if it is a neighbours of the selected planet
+            let row_style = match (app.planet_selector.selected(), app.explorer_selector.selected()) {
+                (Some(planet), None) => {
+                    if app.galaxy_topology[*id as usize][planet] {
+                        Style::default().fg(Color::Red).bold()
                     } else {
                         Style::default()
                     }
                 }
-                None => Style::default(),
+                (None, Some(explorer))=>{
+                    let planet = app.explorers_info.get(&(explorer as u32)).unwrap().current_planet_id;
+                    if app.galaxy_topology[*id as usize][planet as usize] {
+                        Style::default().fg(Color::Red).bold()
+                    } else {
+                        Style::default()
+                    }
+                },
+                (_, _) => Style::default(),
             };
 
-            let status = match info.status {
-                Status::Running => "Running",
-                Status::Paused => "Paused",
-                Status::Dead => "Dead",
-            };
+            let status = get_status_text_color_tuple(info.status);
 
             let incoming: String = app
                 .find_incoming_sunray_asteroid_for_planet(*id)
@@ -48,10 +52,11 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
                 .collect();
 
             Row::new(vec![
+
                 Cell::from(id.to_string()),
+                Cell::from(status.to_string()),
                 Cell::from(info.rocket.to_string()),
                 Cell::from(energy_str),
-                Cell::from(status.to_string()),
                 Cell::from(incoming),
             ])
             .style(row_style)

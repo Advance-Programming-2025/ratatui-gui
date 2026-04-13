@@ -1,6 +1,6 @@
 use crate::app::App;
 use crossterm::event::{self, Event, KeyCode};
-use std::{thread::sleep, time::Duration};
+use std::{time::Duration};
 
 /// Represents the different states the game can be in
 #[derive(Clone, PartialEq, Debug)]
@@ -15,10 +15,8 @@ pub enum GameState {
     Ended,
 }
 
-/// Handles user input and updates the game state accordingly
-///
-/// Polls for keyboard events and processes them based on the current game state.
-/// Only processes Press events to avoid key repeat issues.
+/// Global input handler that bridges TUI events with game logic.
+/// Manages entity selection, galaxy navigation, and orchestrator commands.
 pub fn handle_game_state(app: &mut App) -> Result<(), String> {
     // Very short timeout for responsive input
     if event::poll(Duration::from_millis(5)).map_err(|_| "Polling error")? {
@@ -47,8 +45,23 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                     (KeyCode::Char('o'), GameState::Paused) => app.set_sunray_increment(),
                     (KeyCode::Char('i'), GameState::Paused) => app.set_sunray_decrement(),
 
+                    (KeyCode::Right, GameState::WaitingStart) => {
+                        if app.selected_mode == 1 { // Solo se siamo in Custom
+                            app.adjust_custom_planets(1);
+                        }
+                    }
+                    
+                    (KeyCode::Left, GameState::WaitingStart) => {
+                        if app.selected_mode == 1 { // Solo se siamo in Custom
+                            app.adjust_custom_planets(-1);
+                        }
+                    }
+
+                    (KeyCode::Up, GameState::WaitingStart)|(KeyCode::Down, GameState::WaitingStart)=>{
+                        app.toggle_generation_mode();
+                    }
                     // Navigation events
-                    (KeyCode::Up, _) => {
+                    (KeyCode::Up, GameState::Running) | (KeyCode::Up, GameState::Paused)=> {
                         match (
                             app.explorer_selector.selected(),
                             app.planet_selector.selected(),
@@ -59,7 +72,7 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                             _ => {}
                         }
                     }
-                    (KeyCode::Down, _) => {
+                    (KeyCode::Down, GameState::Running)|(KeyCode::Down, GameState::Paused) => {
                         match (
                             app.explorer_selector.selected(),
                             app.planet_selector.selected(),
@@ -118,22 +131,19 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                             app.planet_typed = None;
                         }
                     }
-                    (KeyCode::Char(d), _) => {
-                        if d.is_digit(10) {
-                            let digit = d.to_digit(10).unwrap();
-                            app.planet_typed = match app.planet_typed {
-                                Some(num) => {
-                                    if num > (u32::MAX - digit) / 10 {
-                                        None
-                                    } else {
-                                        Some(num * 10 + digit)
-                                    }
+                    (KeyCode::Char(d), _) if d.is_digit(10) => {
+                        let digit = d.to_digit(10).unwrap();
+                        app.planet_typed = match app.planet_typed {
+                            Some(num) => {
+                                // Prevent overflow before multiplication
+                                if num > (u32::MAX - digit) / 10 {
+                                    None
+                                } else {
+                                    Some(num * 10 + digit)
                                 }
-                                None => Some(digit),
-                            };
-                        } else {
-                            app.planet_typed = None;
-                        }
+                            }
+                            None => Some(digit),
+                        };
                     }
                     _ => {}
                 }

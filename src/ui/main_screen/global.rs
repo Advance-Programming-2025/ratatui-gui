@@ -58,6 +58,14 @@ pub fn render_globals_info(app: &App, frame: &mut Frame, area: Rect) {
                 .fg(Color::White)
                 .add_modifier(Modifier::BOLD),
         ),
+        Span::styled(" | ", Style::default().fg(Color::Gray)),
+        Span::styled("Sunray%: ", Style::default().fg(Color::Gray)),
+        Span::styled(
+            format!("{}%", app.sunray_rate),
+            Style::default()
+                .fg(Color::White)
+                .add_modifier(Modifier::BOLD),
+        ),
     ])];
 
     let title = Paragraph::new(title_text).alignment(Alignment::Left).block(
