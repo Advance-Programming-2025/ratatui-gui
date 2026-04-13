@@ -65,10 +65,10 @@ impl App {
                 loop {
                     match self.pop_incoming_sunray_asteroid() {
                         Some((planet_id, true)) => {
-                            self.orchestrator.send_sunray_from_gui(vec![planet_id])?
+                            self.orchestrator.send_sunray_from_gui(vec![planet_id])?;
                         }
                         Some((planet_id, false)) => {
-                            self.orchestrator.send_asteroid_from_gui(vec![planet_id])?
+                            self.orchestrator.send_asteroid_from_gui(vec![planet_id])?;
                         }
                         None => break,
                     }
