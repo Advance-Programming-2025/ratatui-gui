@@ -1,7 +1,6 @@
 use ratatui::{
     Frame,
     layout::Rect,
-    style::Style,
     widgets::{Block, Cell, Row, Table},
 };
 
@@ -20,7 +19,7 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect, theme:
             let row_style = if row.highlight_neighbor {
                 theme.danger()
             } else {
-                Style::default()
+                theme.value()
             };
             Row::new(vec![
                 Cell::from(row.id.to_string()),
@@ -35,6 +34,7 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect, theme:
 
     let table = Table::new(rows, layout::planets_columns())
     .header(header)
+    .style(theme.value())
     .block(
         Block::bordered()
             .title(" Planets ")

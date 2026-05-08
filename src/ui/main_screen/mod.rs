@@ -138,10 +138,8 @@ fn render_extra_info_planet(app: &App, frame: &mut Frame, area: Rect, theme: &Th
 
 /// Helper for rendering the empty state of the info panel.
 fn render_extra_info_none(frame: &mut Frame, area: Rect, theme: &Theme) {
-    let paragraph = Paragraph::new(Line::from("  No Entity Selected")).block(
-        Block::bordered()
-            .title(" Extra Info ")
-            .panel(theme),
-    );
+    let paragraph = Paragraph::new(Line::from("  No Entity Selected"))
+        .style(theme.value())
+        .block(Block::bordered().title(" Extra Info ").panel(theme));
     frame.render_widget(paragraph, area);
 }

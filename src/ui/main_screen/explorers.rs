@@ -26,6 +26,7 @@ pub(crate) fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect, the
 
     let table = Table::new(rows, layout::explorers_columns())
     .header(header)
+    .style(theme.value())
     .block(
         Block::bordered()
             .title(" Explorers ")
