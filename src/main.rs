@@ -3,6 +3,7 @@ mod game_state;
 mod loops;
 mod tui_loggers;
 mod ui;
+mod view_models;
 
 use std::sync::Arc;
 

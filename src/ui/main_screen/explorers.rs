@@ -1,59 +1,36 @@
-use omc_galaxy::Status;
 use ratatui::{
     Frame,
-    layout::{Constraint, Rect},
-    style::{Color, Modifier, Style},
+    layout::Rect,
     widgets::{Block, Cell, Row, Table},
 };
 
 use crate::app::App;
-use crate::app::bag_to_string;
+use crate::ui::{layout, theme::{BlockThemeExt, Theme}};
+use crate::view_models;
 
-pub(crate) fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect) {
-    let header = Row::new(vec!["ID", "Status", "Bag", "Planet"]).style(
-        Style::default()
-            .fg(Color::Yellow)
-            .add_modifier(Modifier::BOLD),
-    );
+pub(crate) fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect, theme: &Theme) {
+    let header = Row::new(vec!["ID", "Status", "Bag", "Planet"]).style(theme.header());
 
-    let rows: Vec<Row> = app
-        .explorers_info
-        .iter()
-        .map(|(id, info)| {
-            let status = match info.status {
-                Status::Running => "Running",
-                Status::Paused => "Paused",
-                Status::Dead => "Dead",
-            };
-            let bag = bag_to_string(&info.bag);
-
-            let planet_id = info.current_planet_id.to_string();
-
+    let rows: Vec<Row> = view_models::explorer_rows(app)
+        .into_iter()
+        .map(|row| {
             Row::new(vec![
-                Cell::from(id.to_string()),
-                Cell::from(status.to_string()),
-                Cell::from(bag),
-                Cell::from(planet_id),
+                Cell::from(row.id.to_string()),
+                Cell::from(row.status.to_string()),
+                Cell::from(row.bag),
+                Cell::from(row.planet_id),
             ])
         })
         .collect();
 
-    let table = Table::new(
-        rows,
-        [
-            Constraint::Length(3),
-            Constraint::Length(7),
-            Constraint::Fill(3),
-            Constraint::Length(7),
-        ],
-    )
+    let table = Table::new(rows, layout::explorers_columns())
     .header(header)
     .block(
         Block::bordered()
             .title(" Explorers ")
-            .border_style(Style::default().fg(Color::LightRed)),
+            .panel_active(theme),
     )
-    .row_highlight_style(Style::default().bg(Color::DarkGray).fg(Color::White));
+    .row_highlight_style(theme.row_highlight());
 
     frame.render_stateful_widget(table, area, &mut app.explorer_selector);
 }

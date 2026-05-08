@@ -1,4 +1,4 @@
-use omc_galaxy::{Orchestrator, PlanetInfoMap, Status, utils::ExplorerInfoMap};
+use omc_galaxy::{Orchestrator, PlanetInfoMap, utils::ExplorerInfoMap};
 use ratatui::{widgets::TableState};
 use std::{
     collections::VecDeque,
@@ -396,7 +396,3 @@ pub(crate) fn bag_to_string(bag: &[common_game::components::resource::ResourceTy
         .join("|")
 }
 
-pub(crate) fn get_status_text_color_tuple(status: Status)->String{
-    let status_text = format!("{:?}", status);
-    status_text
-}

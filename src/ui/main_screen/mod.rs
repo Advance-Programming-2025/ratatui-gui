@@ -7,16 +7,17 @@ mod planets;
 use ratatui::{
     Frame,
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
+    style::Modifier,
     text::{Line, Span},
     widgets::{Block, Paragraph},
 };
 
 use crate::app::App;
+use crate::ui::theme::{BlockThemeExt, SpanThemeExt, Theme};
 
 /// Main entry point for the game screen UI.
 /// Organizes the screen into a top bar for globals and a main grid for tables and info.
-pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
+pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame, theme: &Theme) {
     // --- Layout Definition ---
     let outer_layout = Layout::default()
         .direction(Direction::Vertical)
@@ -36,10 +37,7 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
 
     let left_column = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Length(6),
-            Constraint::Fill(1),
-        ])
+        .constraints([Constraint::Length(6), Constraint::Fill(1)])
         .split(main_layout[0]);
 
     let right_column = Layout::default()
@@ -50,30 +48,29 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
         ])
         .split(main_layout[1]);
 
-    // --- Component Rendering ---
-    global::render_globals_info(app, frame, outer_layout[0]);
-    explorers::render_explorers(app, frame, left_column[0]);
-    planets::render_planets_table(app, frame, left_column[1]);
+    global::render_globals_info(app, frame, outer_layout[0], theme);
+    explorers::render_explorers(app, frame, left_column[0], theme);
+    planets::render_planets_table(app, frame, left_column[1], theme);
 
     // Logic to switch between different info panels based on selection
     match (app.explorer_selector.selected(), app.planet_selector.selected()) {
-        (Some(_), _) => render_extra_info_explorer(app, frame, right_column[0]),
-        (None, Some(_)) => render_extra_info_planet(app, frame, right_column[0]),
-        (None, None) => render_extra_info_none(app, frame, right_column[0]),
+        (Some(_), _) => render_extra_info_explorer(app, frame, right_column[0], theme),
+        (None, Some(_)) => render_extra_info_planet(app, frame, right_column[0], theme),
+        (None, None) => render_extra_info_none(frame, right_column[0], theme),
     }
 
-    instructions::render_instructions(app, frame, right_column[1]);
+    instructions::render_instructions(app, frame, right_column[1], theme);
 
     if app.show_log_overlay {
-        log::render_log_overlay(app, frame, main_layout[1]);
+        log::render_log_overlay(app, frame, main_layout[1], theme);
     }
 }
 
 /// Renders detailed explorer info and an input field for planet ID at the bottom.
-fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect) {
+fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
     let block = Block::bordered()
         .title(" Extra Info - Explorer ")
-        .border_style(Style::default().fg(Color::DarkGray));
+        .panel(theme);
     
     let inner_area = block.inner(area);
     frame.render_widget(block, area);
@@ -91,16 +88,16 @@ fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect) {
     let details = vec![
         Line::from(""),
         Line::from(vec![
-            Span::styled("  ID Explorer: ", Style::default().fg(Color::Gray)),
-            Span::styled(format!("{}", app.get_id_selected_explorer()), Style::default().bold()),
+            Span::raw("  ID Explorer: ").muted(theme),
+            Span::styled(format!("{}", app.get_id_selected_explorer()), theme.value().bold()),
         ]),
         Line::from(vec![
-            Span::styled("  Current Planet: ", Style::default().fg(Color::Gray)),
-            Span::styled(app.get_planet_selected_explorer(), Style::default()),
+            Span::raw("  Current Planet: ").muted(theme),
+            Span::styled(app.get_planet_selected_explorer(), theme.value()),
         ]),
         Line::from(vec![
-            Span::styled("  Bag: ", Style::default().fg(Color::Gray)),
-            Span::styled(app.get_bag_selected_explorer(), Style::default()),
+            Span::raw("  Bag: ").muted(theme),
+            Span::styled(app.get_bag_selected_explorer(), theme.value()),
         ]),
     ];
     frame.render_widget(Paragraph::new(details), chunks[0]);
@@ -108,48 +105,48 @@ fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect) {
     // 2. Input Section (Destination)
     let typed_id = app.planet_typed.map(|id| id.to_string()).unwrap_or_else(|| "---".to_string());
     let input_line = Line::from(vec![
-        Span::styled("  Destination Planet ID: ", Style::default().fg(Color::Cyan)),
-        Span::styled(typed_id, Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+        Span::raw("  Destination Planet ID: ").accent(theme),
+        Span::styled(typed_id, theme.warning().add_modifier(Modifier::BOLD)),
     ]);
     frame.render_widget(Paragraph::new(input_line), chunks[1]);
 }
 
 /// Renders planet details when a planet is selected in the table.
-fn render_extra_info_planet(app: &App, frame: &mut Frame, area: Rect) {
+fn render_extra_info_planet(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
     let text = vec![
         Line::from(""),
         Line::from(vec![
-            Span::styled("  Name: ", Style::default().fg(Color::Gray)),
-            Span::styled(app.get_name_selected_planet(), Style::default().bold()),
+            Span::raw("  Name: ").muted(theme),
+            Span::styled(app.get_name_selected_planet(), theme.value().bold()),
         ]),
         Line::from(vec![
-            Span::styled("  ID: ", Style::default().fg(Color::Gray)),
-            Span::styled(app.get_id_selected_planet(), Style::default()),
+            Span::raw("  ID: ").muted(theme),
+            Span::styled(app.get_id_selected_planet(), theme.value()),
         ]),
         Line::from(vec![
-            Span::styled("  Cells: ", Style::default().fg(Color::Gray)),
-            Span::styled(app.get_cells_info_selected_planet(), Style::default()),
+            Span::raw("  Cells: ").muted(theme),
+            Span::styled(app.get_cells_info_selected_planet(), theme.value()),
         ]),
         Line::from(vec![
-            Span::styled("  Rocket: ", Style::default().fg(Color::Gray)),
-            Span::styled(format!("{}", app.get_rocket_of_selected_planet()), Style::default()),
+            Span::raw("  Rocket: ").muted(theme),
+            Span::styled(format!("{}", app.get_rocket_of_selected_planet()), theme.value()),
         ]),
     ];
 
     let paragraph = Paragraph::new(text).block(
         Block::bordered()
             .title(" Extra Info - Planet ")
-            .border_style(Style::default().fg(Color::DarkGray)),
+            .panel(theme),
     );
     frame.render_widget(paragraph, area);
 }
 
 /// Helper for rendering the empty state of the info panel.
-fn render_extra_info_none(_app: &App, frame: &mut Frame, area: Rect) {
+fn render_extra_info_none(frame: &mut Frame, area: Rect, theme: &Theme) {
     let paragraph = Paragraph::new(Line::from("  No Entity Selected")).block(
         Block::bordered()
             .title(" Extra Info ")
-            .border_style(Style::default().fg(Color::DarkGray)),
+            .panel(theme),
     );
     frame.render_widget(paragraph, area);
 }

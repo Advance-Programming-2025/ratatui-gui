@@ -1,78 +1,39 @@
 use ratatui::{
     Frame,
     layout::{Alignment, Rect},
-    style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph},
 };
 
-use crate::{app::App, game_state::GameState};
+use crate::app::App;
+use crate::ui::theme::{SpanThemeExt, Theme};
 
-pub fn render_globals_info(app: &App, frame: &mut Frame, area: Rect) {
+pub fn render_globals_info(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
     let title_text = vec![Line::from(vec![
-        Span::styled("Game: ", Style::default().fg(Color::Gray)),
+        Span::raw("Game: ").muted(theme),
         Span::styled(
             format!("{:?}", app.gamestate),
-            match app.gamestate {
-                GameState::Running => Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
-                GameState::Paused => Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-                GameState::Ended => Style::default()
-                    .fg(Color::Blue)
-                    .add_modifier(Modifier::BOLD),
-                GameState::WaitingStart => Style::default()
-                    .fg(Color::LightCyan)
-                    .add_modifier(Modifier::BOLD),
-            },
+            theme.game_state_style(app.gamestate.clone()),
         ),
-        Span::styled(" | ", Style::default().fg(Color::Gray)),
-        Span::styled("Simulation Time: ", Style::default().fg(Color::Gray)),
-        Span::styled(
-            format!("???",),
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled(" | ", Style::default().fg(Color::Gray)),
-        Span::styled("Total Planets: ", Style::default().fg(Color::Gray)),
-        Span::styled(
-            format!("{}", app.planets_info.len()),
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled(" | ", Style::default().fg(Color::Gray)),
-        Span::styled("Total Explorers: ", Style::default().fg(Color::Gray)),
-        Span::styled(
-            format!("{}", app.explorers_info.len()),
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled(" | ", Style::default().fg(Color::Gray)),
-        Span::styled("Sunray%: ", Style::default().fg(Color::Gray)),
-        Span::styled(
-            format!("{}%", app.sunray_rate),
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled(" | ", Style::default().fg(Color::Gray)),
-        Span::styled("Sunray%: ", Style::default().fg(Color::Gray)),
-        Span::styled(
-            format!("{}%", app.sunray_rate),
-            Style::default()
-                .fg(Color::White)
-                .add_modifier(Modifier::BOLD),
-        ),
+        Span::raw(" | ").muted(theme),
+        Span::raw("Simulation Time: ").muted(theme),
+        Span::styled("???", theme.value().bold()),
+        Span::raw(" | ").muted(theme),
+        Span::raw("Total Planets: ").muted(theme),
+        Span::styled(format!("{}", app.planets_info.len()), theme.value().bold()),
+        Span::raw(" | ").muted(theme),
+        Span::raw("Total Explorers: ").muted(theme),
+        Span::styled(format!("{}", app.explorers_info.len()), theme.value().bold()),
+        Span::raw(" | ").muted(theme),
+        Span::raw("Sunray%: ").muted(theme),
+        Span::styled(format!("{}%", app.sunray_rate), theme.value().bold()),
     ])];
 
     let title = Paragraph::new(title_text).alignment(Alignment::Left).block(
         Block::default()
             .borders(Borders::ALL)
-            .border_style(Style::default().fg(Color::Blue))
-            .style(Style::default()),
+            .border_style(theme.border())
+            .style(theme.value()),
     );
     frame.render_widget(title, area);
 }

@@ -1,34 +1,31 @@
 use crate::app::App;
+use crate::ui::theme::{SpanThemeExt, Theme};
 use log::Level;
 use ratatui::{
     Frame,
     layout::Rect,
-    style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Paragraph, Wrap},
 };
 
 /// Render overlay dei log che copre solo la colonna destra
-pub fn render_log_overlay(app: &App, frame: &mut Frame, area: Rect) {
+pub fn render_log_overlay(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
     let logs_lock = app.log_entries.logs.lock().unwrap();
 
     let mut lines: Vec<Line> = logs_lock
         .iter()
         .map(|(level, msg)| {
-            let color = match *level {
-                Level::Error => Color::Red,
-                Level::Warn => Color::Yellow,
-                Level::Info => Color::Green,
-                Level::Debug => Color::Cyan,
-                Level::Trace => Color::DarkGray,
+            let level_style = match *level {
+                Level::Error => theme.danger(),
+                Level::Warn => theme.warning().bold(),
+                Level::Info => theme.success().bold(),
+                Level::Debug => theme.accent().bold(),
+                Level::Trace => theme.muted(),
             };
 
             Line::from(vec![
-                Span::styled(
-                    format!("{:<5} ", level),
-                    Style::default().fg(color).add_modifier(Modifier::BOLD),
-                ),
-                Span::styled(msg.clone(), Style::default().fg(Color::White)),
+                Span::styled(format!("{:<5} ", level), level_style),
+                Span::styled(msg.clone(), theme.value()),
             ])
         })
         .collect();
@@ -36,25 +33,18 @@ pub fn render_log_overlay(app: &App, frame: &mut Frame, area: Rect) {
     // Aggiungi istruzioni in fondo
     lines.push(Line::from(""));
     lines.push(Line::from(vec![
-        Span::styled("Press ", Style::default().fg(Color::DarkGray)),
-        Span::styled(
-            "L",
-            Style::default()
-                .fg(Color::Green)
-                .add_modifier(Modifier::BOLD),
-        ),
-        Span::styled(" to close", Style::default().fg(Color::DarkGray)),
+        Span::raw("Press ").muted(theme),
+        Span::styled("L", theme.success().bold()),
+        Span::raw(" to close").muted(theme),
     ]));
 
     let log_overlay = Paragraph::new(lines)
         .block(
-            Block::bordered().title(" Game Logs").border_style(
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD),
-            ),
+            Block::bordered()
+                .title(" Game Logs")
+                .border_style(theme.warning().bold()),
         )
-        .style(Style::default()) // Background nero per contrasto
+        .style(theme.value())
         .wrap(Wrap { trim: true });
 
     frame.render_widget(log_overlay, area);

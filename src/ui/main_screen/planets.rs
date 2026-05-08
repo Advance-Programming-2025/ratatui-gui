@@ -1,87 +1,44 @@
-
 use ratatui::{
     Frame,
-    layout::{Constraint, Rect},
-    style::{Color, Modifier, Style},
+    layout::Rect,
+    style::Style,
     widgets::{Block, Cell, Row, Table},
 };
 
-use crate::app::{App, get_status_text_color_tuple};
+use crate::app::App;
+use crate::ui::{layout, theme::Theme};
+use crate::view_models;
 
-pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
-    let header = Row::new(vec!["ID", "Status","Rocket", "Energy", "Incoming"]).style(
-        Style::default()
-            .fg(Color::Yellow)
-            .add_modifier(Modifier::BOLD),
-    );
+pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect, theme: &Theme) {
+    let header = Row::new(vec!["ID", "Status", "Rocket", "Energy", "Incoming"]).style(theme.header());
 
-    // TODO: discriminate between the number of energy cells
-    let rows: Vec<Row> = app
-        .planets_info
-        .iter()
-        .map(|(id, info)| {
-            let energy_str = "■".repeat(info.charged_cells_count)
-                + &"□".repeat(info.energy_cells.len() - info.charged_cells_count);
-
-            // Row style: write in Red if it is a neighbours of the selected planet
-            let row_style = match (app.planet_selector.selected(), app.explorer_selector.selected()) {
-                (Some(planet), None) => {
-                    if app.galaxy_topology[*id as usize][planet] {
-                        Style::default().fg(Color::Red).bold()
-                    } else {
-                        Style::default()
-                    }
-                }
-                (None, Some(explorer))=>{
-                    let planet = app.explorers_info.get(&(explorer as u32)).unwrap().current_planet_id;
-                    if app.galaxy_topology[*id as usize][planet as usize] {
-                        Style::default().fg(Color::Red).bold()
-                    } else {
-                        Style::default()
-                    }
-                },
-                (_, _) => Style::default(),
+    let rows: Vec<Row> = view_models::planet_rows(app)
+        .into_iter()
+        .map(|row| {
+            let row_style = if row.highlight_neighbor {
+                theme.danger()
+            } else {
+                Style::default()
             };
-
-            let status = get_status_text_color_tuple(info.status);
-
-            let incoming: String = app
-                .find_incoming_sunray_asteroid_for_planet(*id)
-                .iter()
-                .map(|&is_sunray| if is_sunray { 'S' } else { 'A' })
-                .collect();
-
             Row::new(vec![
-
-                Cell::from(id.to_string()),
-                Cell::from(status.to_string()),
-                Cell::from(info.rocket.to_string()),
-                Cell::from(energy_str),
-                Cell::from(incoming),
+                Cell::from(row.id.to_string()),
+                Cell::from(row.status),
+                Cell::from(row.rocket),
+                Cell::from(row.energy),
+                Cell::from(row.incoming),
             ])
             .style(row_style)
         })
         .collect();
 
-    let table = Table::new(
-        rows,
-        [
-            Constraint::Length(4),
-            Constraint::Min(7),
-            Constraint::Min(7),
-            Constraint::Min(7),
-            Constraint::Min(7),
-        ],
-    )
+    let table = Table::new(rows, layout::planets_columns())
     .header(header)
     .block(
         Block::bordered()
             .title(" Planets ")
-            .border_style(Style::default().fg(Color::Green)),
+            .border_style(theme.success()),
     )
-    // AGGIUNTA: Definiamo lo stile della riga selezionata centralmente
-    .row_highlight_style(Style::default().bg(Color::DarkGray).fg(Color::White));
+    .row_highlight_style(theme.row_highlight());
 
-    // CAMBIO: Usa render_stateful_widget invece di render_widget
     frame.render_stateful_widget(table, area, &mut app.planet_selector);
 }
