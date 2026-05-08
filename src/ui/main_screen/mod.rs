@@ -19,50 +19,45 @@ use crate::ui::theme::{BlockThemeExt, SpanThemeExt, Theme};
 /// Organizes the screen into a top bar for globals and a main grid for tables and info.
 pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame, theme: &Theme) {
     // --- Layout Definition ---
-    let outer_layout = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Length(3), // Global variables
-            Constraint::Fill(1),   // Main content
-        ])
-        .split(frame.area());
+    let [global_area, main_area] =
+        Layout::vertical([Constraint::Length(3), Constraint::Fill(1)]).areas(frame.area());
 
-    let main_layout = Layout::default()
-        .direction(Direction::Horizontal)
-        .constraints([
-            Constraint::Percentage(40), // Left: Tables
-            Constraint::Percentage(60), // Right: Details & Log
-        ])
-        .split(outer_layout[1]);
+    let [planets_area, explorers_area, other_area] = Layout::horizontal([
+        Constraint::Percentage(30),
+        Constraint::Percentage(30),
+        Constraint::Percentage(40),
+    ])
+    .areas(main_area);
 
-    let left_column = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Length(6), Constraint::Fill(1)])
-        .split(main_layout[0]);
+    let [planets_info_area, planets_list_area] =
+        Layout::vertical([Constraint::Percentage(45), Constraint::Fill(1)]).areas(planets_area);
 
-    let right_column = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Percentage(60), // Info area
-            Constraint::Percentage(40), // Instructions
-        ])
-        .split(main_layout[1]);
+    let [explorers_info_area, explorers_list_area] =
+        Layout::vertical([Constraint::Percentage(45), Constraint::Fill(1)]).areas(explorers_area);
 
-    global::render_globals_info(app, frame, outer_layout[0], theme);
-    explorers::render_explorers(app, frame, left_column[0], theme);
-    planets::render_planets_table(app, frame, left_column[1], theme);
+    global::render_globals_info(app, frame, global_area, theme);
+    explorers::render_explorers(app, frame, explorers_list_area, theme);
+    planets::render_planets_table(app, frame, planets_list_area, theme);
 
-    // Logic to switch between different info panels based on selection
     match (app.explorer_selector.selected(), app.planet_selector.selected()) {
-        (Some(_), _) => render_extra_info_explorer(app, frame, right_column[0], theme),
-        (None, Some(_)) => render_extra_info_planet(app, frame, right_column[0], theme),
-        (None, None) => render_extra_info_none(frame, right_column[0], theme),
+        (Some(_), _) => {
+            render_extra_info_explorer(app, frame, explorers_info_area, theme);
+            render_extra_info_none(frame, planets_info_area, theme);
+        }
+        (None, Some(_)) => {
+            render_extra_info_none(frame, explorers_info_area, theme);
+            render_extra_info_planet(app, frame, planets_info_area, theme);
+        }
+        (None, None) => {
+            render_extra_info_none(frame, planets_info_area, theme);
+            render_extra_info_none(frame, explorers_info_area, theme);
+        }
     }
 
-    instructions::render_instructions(app, frame, right_column[1], theme);
+    instructions::render_instructions(app, frame, other_area, theme);
 
     if app.show_log_overlay {
-        log::render_log_overlay(app, frame, main_layout[1], theme);
+        log::render_log_overlay(app, frame, other_area, theme);
     }
 }
 
