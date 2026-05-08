@@ -1,6 +1,6 @@
 use crate::app::App;
 use crossterm::event::{self, Event, KeyCode};
-use std::{time::Duration};
+use std::time::Duration;
 
 /// Represents the different states the game can be in
 #[derive(Clone, PartialEq, Debug)]
@@ -46,22 +46,25 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                     (KeyCode::Char('i'), GameState::Paused) => app.set_sunray_decrement(),
 
                     (KeyCode::Right, GameState::WaitingStart) => {
-                        if app.selected_mode == 1 { // Solo se siamo in Custom
+                        if app.selected_mode == 1 {
+                            // Solo se siamo in Custom
                             app.adjust_custom_planets(1);
                         }
                     }
-                    
+
                     (KeyCode::Left, GameState::WaitingStart) => {
-                        if app.selected_mode == 1 { // Solo se siamo in Custom
+                        if app.selected_mode == 1 {
+                            // Solo se siamo in Custom
                             app.adjust_custom_planets(-1);
                         }
                     }
 
-                    (KeyCode::Up, GameState::WaitingStart)|(KeyCode::Down, GameState::WaitingStart)=>{
+                    (KeyCode::Up, GameState::WaitingStart)
+                    | (KeyCode::Down, GameState::WaitingStart) => {
                         app.toggle_generation_mode();
                     }
                     // Navigation events
-                    (KeyCode::Up, GameState::Running) | (KeyCode::Up, GameState::Paused)=> {
+                    (KeyCode::Up, GameState::Running) | (KeyCode::Up, GameState::Paused) => {
                         match (
                             app.explorer_selector.selected(),
                             app.planet_selector.selected(),
@@ -72,7 +75,7 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                             _ => {}
                         }
                     }
-                    (KeyCode::Down, GameState::Running)|(KeyCode::Down, GameState::Paused) => {
+                    (KeyCode::Down, GameState::Running) | (KeyCode::Down, GameState::Paused) => {
                         match (
                             app.explorer_selector.selected(),
                             app.planet_selector.selected(),

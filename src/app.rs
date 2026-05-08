@@ -1,5 +1,5 @@
 use omc_galaxy::{Orchestrator, PlanetInfoMap, Status, utils::ExplorerInfoMap};
-use ratatui::{widgets::TableState};
+use ratatui::widgets::TableState;
 use std::{
     collections::VecDeque,
     sync::Arc,
@@ -121,7 +121,7 @@ impl App {
 }
 
 //Menù selector
-impl App{
+impl App {
     /// Cambia la modalità selezionata (0 per Random, 1 per Custom)
     pub fn toggle_generation_mode(&mut self) {
         if self.selected_mode == 0 {
@@ -309,9 +309,7 @@ impl App {
 }
 
 // Methods for handling both explorer and planet
-impl App{
-
-}
+impl App {}
 
 // Handler sunray asteroid send
 impl App {
@@ -396,7 +394,7 @@ pub(crate) fn bag_to_string(bag: &[common_game::components::resource::ResourceTy
         .join("|")
 }
 
-pub(crate) fn get_status_text_color_tuple(status: Status)->String{
+pub(crate) fn get_status_text_color_tuple(status: Status) -> String {
     let status_text = format!("{:?}", status);
     status_text
 }

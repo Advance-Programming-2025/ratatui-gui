@@ -11,7 +11,7 @@ use ratatui::{
     text::{Line, Span},
     widgets::{Block, Paragraph},
 };
-    
+
 use crate::app::App;
 
 /// Main entry point for the game screen UI.
@@ -19,30 +19,26 @@ use crate::app::App;
 pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
     // --- Layout Definition ---
     let [global, main_layout] = Layout::vertical([
-            Constraint::Length(3), // Global variables
-            Constraint::Fill(1),   // Main content
-        ])
-        .areas(frame.area());
+        Constraint::Length(3), // Global variables
+        Constraint::Fill(1),   // Main content
+    ])
+    .areas(frame.area());
 
     let [planets, explorers, other] = Layout::horizontal([
-            Constraint::Percentage(30), // Left: Tables
-            Constraint::Percentage(30), // Right: Details & Log
-            Constraint::Percentage(40)
+        Constraint::Percentage(30), // Left: Tables
+        Constraint::Percentage(30), // Right: Details & Log
+        Constraint::Percentage(40),
+    ])
+    .areas(main_layout);
 
-        ])
-        .areas(main_layout);
-
-    let [planets_info, planets_list] = Layout::vertical([
-            Constraint::Percentage(45),
-            Constraint::Fill(1),
-        ])
-        .areas(planets);
+    let [planets_info, planets_list] =
+        Layout::vertical([Constraint::Percentage(45), Constraint::Fill(1)]).areas(planets);
 
     let [explorers_info, explorers_list] = Layout::vertical([
-            Constraint::Percentage(45), // Info area
-            Constraint::Fill(1), // Instructions
-        ])
-        .areas(explorers);
+        Constraint::Percentage(45), // Info area
+        Constraint::Fill(1),        // Instructions
+    ])
+    .areas(explorers);
 
     // --- Component Rendering ---
     global::render_globals_info(app, frame, global);
@@ -50,13 +46,22 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame) {
     planets::render_planets_table(app, frame, planets_list);
 
     // Logic to switch between different info panels based on selection
-    match (app.explorer_selector.selected(), app.planet_selector.selected()) {
-        (Some(_), _) => render_extra_info_explorer(app, frame, explorers_info),
-        (None, Some(_)) => render_extra_info_planet(app, frame, planets_info),
-        (None, None) =>{
+    match (
+        app.explorer_selector.selected(),
+        app.planet_selector.selected(),
+    ) {
+        (Some(_), _) => {
+            render_extra_info_explorer(app, frame, explorers_info);
+            render_extra_info_none(app, frame, planets_info);
+        }
+        (None, Some(_)) => {
+            render_extra_info_none(app, frame, explorers_info);
+            render_extra_info_planet(app, frame, planets_info);
+        }
+        (None, None) => {
             render_extra_info_none(app, frame, planets_info);
             render_extra_info_none(app, frame, explorers_info);
-        },
+        }
     }
 
     instructions::render_instructions(app, frame, other);
@@ -71,7 +76,7 @@ fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect) {
     let block = Block::bordered()
         .title(" Extra Info - Explorer ")
         .border_style(Style::default().fg(Color::DarkGray));
-    
+
     let inner_area = block.inner(area);
     frame.render_widget(block, area);
 
@@ -89,7 +94,10 @@ fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect) {
         Line::from(""),
         Line::from(vec![
             Span::styled("  ID Explorer: ", Style::default().fg(Color::Gray)),
-            Span::styled(format!("{}", app.get_id_selected_explorer()), Style::default().bold()),
+            Span::styled(
+                format!("{}", app.get_id_selected_explorer()),
+                Style::default().bold(),
+            ),
         ]),
         Line::from(vec![
             Span::styled("  Current Planet: ", Style::default().fg(Color::Gray)),
@@ -103,10 +111,21 @@ fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect) {
     frame.render_widget(Paragraph::new(details), chunks[0]);
 
     // 2. Input Section (Destination)
-    let typed_id = app.planet_typed.map(|id| id.to_string()).unwrap_or_else(|| "---".to_string());
+    let typed_id = app
+        .planet_typed
+        .map(|id| id.to_string())
+        .unwrap_or_else(|| "---".to_string());
     let input_line = Line::from(vec![
-        Span::styled("  Destination Planet ID: ", Style::default().fg(Color::Cyan)),
-        Span::styled(typed_id, Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "  Destination Planet ID: ",
+            Style::default().fg(Color::Cyan),
+        ),
+        Span::styled(
+            typed_id,
+            Style::default()
+                .fg(Color::Yellow)
+                .add_modifier(Modifier::BOLD),
+        ),
     ]);
     frame.render_widget(Paragraph::new(input_line), chunks[1]);
 }
@@ -129,7 +148,10 @@ fn render_extra_info_planet(app: &App, frame: &mut Frame, area: Rect) {
         ]),
         Line::from(vec![
             Span::styled("  Rocket: ", Style::default().fg(Color::Gray)),
-            Span::styled(format!("{}", app.get_rocket_of_selected_planet()), Style::default()),
+            Span::styled(
+                format!("{}", app.get_rocket_of_selected_planet()),
+                Style::default(),
+            ),
         ]),
     ];
 
