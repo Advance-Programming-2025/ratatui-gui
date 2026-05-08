@@ -9,8 +9,8 @@ use ratatui::{
 use crate::app::App;
 use crate::ui::theme::{SpanThemeExt, Theme};
 
-/// Renders the multi-step start screen.
-/// Includes game introduction and galaxy generation settings.
+/// Render start screen (pre-game).
+/// Shows intro text and generation mode selection.
 pub fn render_start_screen(app: &App, frame: &mut Frame, theme: &Theme) {
     let area = frame.area();
 
@@ -40,6 +40,7 @@ pub fn render_start_screen(app: &App, frame: &mut Frame, theme: &Theme) {
     render_footer(frame, chunks[2], theme);
 }
 
+/// Render top title bar for start screen.
 fn render_title(frame: &mut Frame, area: Rect, theme: &Theme) {
     let title = Paragraph::new("ONE MILLION CRABS GALAXY")
         .alignment(Alignment::Center)
@@ -52,6 +53,7 @@ fn render_title(frame: &mut Frame, area: Rect, theme: &Theme) {
     frame.render_widget(title, area);
 }
 
+/// Render mission briefing text panel.
 fn render_intro_text(frame: &mut Frame, area: Rect, theme: &Theme) {
     let intro = "Welcome Commander. You are tasked with overseeing the crab-driven expansion across the sector. \
                   Manage explorers, collect rare resources, and maintain planetary equilibrium. \
@@ -69,6 +71,8 @@ fn render_intro_text(frame: &mut Frame, area: Rect, theme: &Theme) {
     frame.render_widget(p, area);
 }
 
+/// Render mode selection menu.
+/// Reads selection state from `App` and highlights active choice.
 fn render_generation_menu(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
     // Note: Assuming app.selected_mode: 0 = Random, 1 = Custom
     // Assuming app.custom_planet_count for the custom input display
@@ -110,6 +114,7 @@ fn render_generation_menu(app: &App, frame: &mut Frame, area: Rect, theme: &Them
     frame.render_widget(menu, area);
 }
 
+/// Render footer with key hints.
 fn render_footer(frame: &mut Frame, area: Rect, theme: &Theme) {
     let info = Line::from(vec![
         Span::styled(" UP/DOWN ", theme.key()),

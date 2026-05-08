@@ -1,6 +1,10 @@
+/// Game UI screens and render entrypoints.
 mod main_screen;
+/// Start screen and pre-game UI.
 mod screens;
+/// Centralized layout constraints for tables.
 mod layout;
+/// Theme and styling utilities.
 pub mod theme;
 
 use ratatui::Frame;
@@ -8,8 +12,8 @@ use ratatui::Frame;
 use crate::app::App;
 use crate::game_state::GameState;
 
-/// Primary entry point for rendering.
-/// Dispatches the frame to specific screens (Start, Running, Paused) based on GameState.
+/// UI render entrypoint.
+/// Selects active screen based on `GameState` and passes theme context down.
 pub fn render_ui(app: &mut App, frame: &mut Frame) {
     let theme = theme::Theme::matrix();
     match app.get_game_state() {

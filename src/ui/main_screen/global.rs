@@ -8,6 +8,8 @@ use ratatui::{
 use crate::app::App;
 use crate::ui::theme::{SpanThemeExt, Theme};
 
+/// Render global status bar (top panel).
+/// Shows game state and a few aggregate counters.
 pub fn render_globals_info(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
     let title_text = vec![Line::from(vec![
         Span::raw("Game: ").muted(theme),

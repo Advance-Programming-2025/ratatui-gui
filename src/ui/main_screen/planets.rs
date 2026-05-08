@@ -9,6 +9,8 @@ use crate::app::App;
 use crate::ui::{layout, theme::Theme};
 use crate::view_models;
 
+/// Render planets table (list view).
+/// Row styling uses view model flags (neighbor highlight) instead of inline logic.
 pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect, theme: &Theme) {
     let header = Row::new(vec!["ID", "Status", "Rocket", "Energy", "Incoming"]).style(theme.header());
 

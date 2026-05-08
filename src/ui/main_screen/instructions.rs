@@ -8,6 +8,7 @@ use ratatui::{
 use crate::app::App;
 use crate::ui::theme::{SpanThemeExt, Theme};
 
+/// Render help panel with key bindings.
 pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
     let text = vec![
         Line::from(""),

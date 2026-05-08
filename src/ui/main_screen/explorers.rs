@@ -8,6 +8,7 @@ use crate::app::App;
 use crate::ui::{layout, theme::{BlockThemeExt, Theme}};
 use crate::view_models;
 
+/// Render explorers table (list view).
 pub(crate) fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect, theme: &Theme) {
     let header = Row::new(vec!["ID", "Status", "Bag", "Planet"]).style(theme.header());
 

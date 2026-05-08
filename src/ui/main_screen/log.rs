@@ -8,7 +8,8 @@ use ratatui::{
     widgets::{Block, Paragraph, Wrap},
 };
 
-/// Render overlay dei log che copre solo la colonna destra
+/// Render log overlay panel.
+/// Overlays right-side area with recent log lines.
 pub fn render_log_overlay(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
     let logs_lock = app.log_entries.logs.lock().unwrap();
 

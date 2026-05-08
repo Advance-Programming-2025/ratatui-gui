@@ -2,24 +2,39 @@ use omc_galaxy::Status;
 
 use crate::app::{bag_to_string, App};
 
+/// Pre-formatted explorer row for table rendering.
+/// Keeps UI render code focused on layout and widget composition.
 #[derive(Debug, Clone)]
 pub struct ExplorerRowVm {
+    /// Explorer id.
     pub id: u32,
+    /// Human-readable status label.
     pub status: &'static str,
+    /// Condensed bag representation.
     pub bag: String,
+    /// Current planet id as string.
     pub planet_id: String,
 }
 
+/// Pre-formatted planet row for table rendering.
+/// Contains both display text and simple render flags.
 #[derive(Debug, Clone)]
 pub struct PlanetRowVm {
+    /// Planet id.
     pub id: u32,
+    /// Human-readable status label.
     pub status: String,
+    /// Rocket availability text.
     pub rocket: String,
+    /// Energy bar string (charged/un-charged cells).
     pub energy: String,
+    /// Incoming events string (S for sunray, A for asteroid).
     pub incoming: String,
+    /// Neighbor highlight flag for current selection context.
     pub highlight_neighbor: bool,
 }
 
+/// Build explorer table rows from current app snapshot.
 pub fn explorer_rows(app: &App) -> Vec<ExplorerRowVm> {
     app.explorers_info
         .iter()
@@ -32,6 +47,7 @@ pub fn explorer_rows(app: &App) -> Vec<ExplorerRowVm> {
         .collect()
 }
 
+/// Build planet table rows from current app snapshot.
 pub fn planet_rows(app: &App) -> Vec<PlanetRowVm> {
     app.planets_info
         .iter()
@@ -58,6 +74,7 @@ pub fn planet_rows(app: &App) -> Vec<PlanetRowVm> {
         .collect()
 }
 
+/// Status game labels for UI.
 fn status_text(status: Status) -> &'static str {
     match status {
         Status::Running => "Running",
@@ -66,10 +83,12 @@ fn status_text(status: Status) -> &'static str {
     }
 }
 
+/// Energy bar rendering
 fn energy_bar(charged: usize, total: usize) -> String {
     "■".repeat(charged) + &"□".repeat(total.saturating_sub(charged))
 }
 
+/// Neighbor detection on current explorer or planet selection.
 fn is_neighbor_of_selection(app: &App, row_planet_id: u32) -> bool {
     match (app.planet_selector.selected(), app.explorer_selector.selected()) {
         (Some(selected_planet), None) => app.galaxy_topology[row_planet_id as usize][selected_planet],
@@ -86,4 +105,3 @@ fn is_neighbor_of_selection(app: &App, row_planet_id: u32) -> bool {
         _ => false,
     }
 }
-
