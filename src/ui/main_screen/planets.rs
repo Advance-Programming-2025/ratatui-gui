@@ -5,12 +5,15 @@ use ratatui::{
     widgets::{Block, Cell, Row, Table},
 };
 
+//color import
+use super::*;
+
 use crate::app::{App, get_status_text_color_tuple};
 
 pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
     let header = Row::new(vec!["ID", "Status", "Rocket", "Energy", "Incoming"]).style(
         Style::default()
-            .fg(Color::Yellow)
+            .fg(MATRIX_GREEN)
             .add_modifier(Modifier::BOLD),
     );
 
@@ -23,31 +26,33 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
                 + &"□".repeat(info.energy_cells.len() - info.charged_cells_count);
 
             // Row style: write in Red if it is a neighbours of the selected planet
-            let row_style = match (
-                app.planet_selector.selected(),
-                app.explorer_selector.selected(),
-            ) {
-                (Some(planet), None) => {
-                    if app.galaxy_topology[*id as usize][planet] {
-                        Style::default().fg(Color::Red).bold()
-                    } else {
-                        Style::default()
-                    }
-                }
-                (None, Some(explorer)) => {
-                    let planet = app
-                        .explorers_info
-                        .get(&(explorer as u32))
-                        .unwrap()
-                        .current_planet_id;
-                    if app.galaxy_topology[*id as usize][planet as usize] {
-                        Style::default().fg(Color::Red).bold()
-                    } else {
-                        Style::default()
-                    }
-                }
-                (_, _) => Style::default(),
-            };
+            let row_style = Style::default().fg(MATRIX_GREEN);
+
+            // match (
+            //     app.planet_selector.selected(),
+            //     app.explorer_selector.selected(),
+            // ) {
+            //     (Some(planet), None) => {
+            //         if app.galaxy_topology[*id as usize][planet] {
+            //             Style::default().fg(MATRIX_GREEN).bold()
+            //         } else {
+            //             Style::default()
+            //         }
+            //     }
+            //     (None, Some(explorer)) => {
+            //         let planet = app
+            //             .explorers_info
+            //             .get(&(explorer as u32))
+            //             .unwrap()
+            //             .current_planet_id;
+            //         if app.galaxy_topology[*id as usize][planet as usize] {
+            //             Style::default().fg(MATRIX_GREEN).bold()
+            //         } else {
+            //             Style::default()
+            //         }
+            //     }
+            //     (_, _) => Style::default(),
+            // };
 
             let status = get_status_text_color_tuple(info.status);
 
@@ -65,6 +70,7 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
                 Cell::from(incoming),
             ])
             .style(row_style)
+            .fg(MATRIX_GREEN)
         })
         .collect();
 
@@ -82,10 +88,10 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect) {
     .block(
         Block::bordered()
             .title(" Planets ")
-            .border_style(Style::default().fg(Color::Green)),
+            .border_style(Style::default().fg(MATRIX_GREEN)),
     )
     // AGGIUNTA: Definiamo lo stile della riga selezionata centralmente
-    .row_highlight_style(Style::default().bg(Color::DarkGray).fg(Color::White));
+    .row_highlight_style(Style::default().bg(Color::DarkGray).fg(MATRIX_GREEN));
 
     // CAMBIO: Usa render_stateful_widget invece di render_widget
     frame.render_stateful_widget(table, area, &mut app.planet_selector);
