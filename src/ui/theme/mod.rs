@@ -21,37 +21,41 @@ impl Theme {
     }
 
     pub fn muted(&self) -> Style {
-        Style::default().fg(self.palette.fg_muted)
+        Style::default().fg(self.palette.matrix_green)
     }
 
     pub fn value(&self) -> Style {
-        Style::default().fg(self.palette.fg_primary)
+        Style::default().fg(self.palette.matrix_green)
     }
 
     pub fn accent(&self) -> Style {
-        Style::default().fg(self.palette.fg_accent)
+        Style::default().fg(self.palette.matrix_green)
     }
 
     pub fn warning(&self) -> Style {
-        Style::default().fg(self.palette.fg_warning)
+        Style::default().fg(self.palette.matrix_green)
     }
 
     pub fn danger(&self) -> Style {
         Style::default()
-            .fg(self.palette.fg_danger)
+            .fg(self.palette.matrix_green)
             .add_modifier(Modifier::BOLD)
     }
 
     pub fn success(&self) -> Style {
-        Style::default().fg(self.palette.fg_success)
+        Style::default().fg(self.palette.matrix_green)
     }
 
     pub fn key(&self) -> Style {
-        Style::default().fg(self.palette.fg_key).add_modifier(Modifier::BOLD)
+        Style::default()
+            .fg(self.palette.matrix_green)
+            .add_modifier(Modifier::BOLD)
     }
 
     pub fn nav(&self) -> Style {
-        Style::default().fg(self.palette.fg_nav).add_modifier(Modifier::BOLD)
+        Style::default()
+            .fg(self.palette.matrix_green)
+            .add_modifier(Modifier::BOLD)
     }
 
     pub fn header(&self) -> Style {
@@ -61,17 +65,17 @@ impl Theme {
     }
 
     pub fn border(&self) -> Style {
-        Style::default().fg(self.palette.border)
+        Style::default().fg(self.palette.matrix_green)
     }
 
     pub fn border_active(&self) -> Style {
-        Style::default().fg(self.palette.border_active)
+        Style::default().fg(self.palette.matrix_green)
     }
 
     pub fn row_highlight(&self) -> Style {
         Style::default()
             .bg(self.palette.bg_highlight)
-            .fg(self.palette.fg_primary)
+            .fg(self.palette.matrix_green)
     }
 
     pub fn game_state_style(&self, state: GameState) -> Style {
@@ -79,10 +83,10 @@ impl Theme {
             GameState::Running => self.danger(),
             GameState::Paused => self.warning().add_modifier(Modifier::BOLD),
             GameState::Ended => Style::default()
-                .fg(self.palette.fg_info)
+                .fg(self.palette.matrix_green)
                 .add_modifier(Modifier::BOLD),
             GameState::WaitingStart => Style::default()
-                .fg(self.palette.fg_info_dim)
+                .fg(self.palette.matrix_green)
                 .add_modifier(Modifier::BOLD),
         }
     }

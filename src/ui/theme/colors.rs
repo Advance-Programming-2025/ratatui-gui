@@ -2,6 +2,7 @@ use ratatui::style::Color;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Palette {
+    pub matrix_green: Color,
     pub fg_primary: Color,
     pub fg_muted: Color,
     pub fg_accent: Color,
@@ -22,6 +23,8 @@ pub struct Palette {
 impl Palette {
     pub fn matrix() -> Self {
         Self {
+            matrix_green: Color::Rgb(51, 255, 51),
+            
             fg_primary: Color::White,
             fg_muted: Color::Gray,
             fg_accent: Color::Cyan,
@@ -32,8 +35,10 @@ impl Palette {
             fg_info_dim: Color::LightCyan,
             fg_key: Color::Magenta,
             fg_nav: Color::Cyan,
+
             border: Color::DarkGray,
             border_active: Color::LightRed,
+
             bg_highlight: Color::DarkGray,
         }
     }
