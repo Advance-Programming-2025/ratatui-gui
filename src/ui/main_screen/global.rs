@@ -25,7 +25,10 @@ pub fn render_globals_info(app: &App, frame: &mut Frame, area: Rect, theme: &The
         Span::styled(format!("{}", app.planets_info.len()), theme.value().bold()),
         Span::raw(" | ").muted(theme),
         Span::raw("Total Explorers: ").muted(theme),
-        Span::styled(format!("{}", app.explorers_info.len()), theme.value().bold()),
+        Span::styled(
+            format!("{}", app.explorers_info.len()),
+            theme.value().bold(),
+        ),
         Span::raw(" | ").muted(theme),
         Span::raw("Sunray%: ").muted(theme),
         Span::styled(format!("{}%", app.sunray_rate), theme.value().bold()),

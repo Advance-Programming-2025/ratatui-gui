@@ -1,9 +1,9 @@
+/// Centralized layout constraints for tables.
+mod layout;
 /// Game UI screens and render entrypoints.
 mod main_screen;
 /// Start screen and pre-game UI.
 mod screens;
-/// Centralized layout constraints for tables.
-mod layout;
 /// Theme and styling utilities.
 pub mod theme;
 

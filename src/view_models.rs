@@ -1,6 +1,6 @@
 use omc_galaxy::Status;
 
-use crate::app::{bag_to_string, App};
+use crate::app::{App, bag_to_string};
 
 /// Pre-formatted explorer row for table rendering.
 /// Keeps UI render code focused on layout and widget composition.
@@ -90,8 +90,13 @@ fn energy_bar(charged: usize, total: usize) -> String {
 
 /// Neighbor detection on current explorer or planet selection.
 fn is_neighbor_of_selection(app: &App, row_planet_id: u32) -> bool {
-    match (app.planet_selector.selected(), app.explorer_selector.selected()) {
-        (Some(selected_planet), None) => app.galaxy_topology[row_planet_id as usize][selected_planet],
+    match (
+        app.planet_selector.selected(),
+        app.explorer_selector.selected(),
+    ) {
+        (Some(selected_planet), None) => {
+            app.galaxy_topology[row_planet_id as usize][selected_planet]
+        }
         (None, Some(selected_explorer)) => {
             let explorer_planet = app
                 .explorers_info

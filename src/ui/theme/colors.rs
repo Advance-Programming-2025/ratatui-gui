@@ -45,7 +45,7 @@ impl Palette {
     pub fn matrix() -> Self {
         Self {
             matrix_green: MATRIX_GREEN,
-            
+
             fg_primary: Color::White,
             fg_muted: Color::Gray,
             fg_accent: Color::Cyan,

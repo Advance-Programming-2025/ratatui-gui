@@ -39,7 +39,10 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame, theme: &Theme) {
     explorers::render_explorers(app, frame, explorers_list_area, theme);
     planets::render_planets_table(app, frame, planets_list_area, theme);
 
-    match (app.explorer_selector.selected(), app.planet_selector.selected()) {
+    match (
+        app.explorer_selector.selected(),
+        app.planet_selector.selected(),
+    ) {
         (Some(_), _) => {
             render_extra_info_explorer(app, frame, explorers_info_area, theme);
             render_extra_info_none(frame, planets_info_area, theme);
@@ -66,7 +69,7 @@ fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect, theme: &
     let block = Block::bordered()
         .title(" Extra Info - Explorer ")
         .panel(theme);
-    
+
     let inner_area = block.inner(area);
     frame.render_widget(block, area);
 
@@ -84,7 +87,10 @@ fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect, theme: &
         Line::from(""),
         Line::from(vec![
             Span::raw("  ID Explorer: ").muted(theme),
-            Span::styled(format!("{}", app.get_id_selected_explorer()), theme.value().bold()),
+            Span::styled(
+                format!("{}", app.get_id_selected_explorer()),
+                theme.value().bold(),
+            ),
         ]),
         Line::from(vec![
             Span::raw("  Current Planet: ").muted(theme),
@@ -98,7 +104,10 @@ fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect, theme: &
     frame.render_widget(Paragraph::new(details), chunks[0]);
 
     // 2. Input Section (Destination)
-    let typed_id = app.planet_typed.map(|id| id.to_string()).unwrap_or_else(|| "---".to_string());
+    let typed_id = app
+        .planet_typed
+        .map(|id| id.to_string())
+        .unwrap_or_else(|| "---".to_string());
     let input_line = Line::from(vec![
         Span::raw("  Destination Planet ID: ").accent(theme),
         Span::styled(typed_id, theme.warning().add_modifier(Modifier::BOLD)),
@@ -124,7 +133,10 @@ fn render_extra_info_planet(app: &App, frame: &mut Frame, area: Rect, theme: &Th
         ]),
         Line::from(vec![
             Span::raw("  Rocket: ").muted(theme),
-            Span::styled(format!("{}", app.get_rocket_of_selected_planet()), theme.value()),
+            Span::styled(
+                format!("{}", app.get_rocket_of_selected_planet()),
+                theme.value(),
+            ),
         ]),
     ];
 

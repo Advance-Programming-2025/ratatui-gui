@@ -58,7 +58,7 @@ fn render_intro_text(frame: &mut Frame, area: Rect, theme: &Theme) {
     let intro = "Welcome Commander. You are tasked with overseeing the crab-driven expansion across the sector. \
                   Manage explorers, collect rare resources, and maintain planetary equilibrium. \
                   Your journey begins with the formation of the galaxy topology.";
-    
+
     let p = Paragraph::new(intro)
         .wrap(Wrap { trim: true })
         .alignment(Alignment::Center)
@@ -76,7 +76,7 @@ fn render_intro_text(frame: &mut Frame, area: Rect, theme: &Theme) {
 fn render_generation_menu(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
     // Note: Assuming app.selected_mode: 0 = Random, 1 = Custom
     // Assuming app.custom_planet_count for the custom input display
-    
+
     let is_random = app.selected_mode == 0;
     let is_custom = app.selected_mode == 1;
 
@@ -99,7 +99,10 @@ fn render_generation_menu(app: &App, frame: &mut Frame, area: Rect, theme: &Them
         Line::from(""),
         Line::from(vec![
             Span::styled(if is_custom { " > " } else { "   " }, custom_style),
-            Span::styled(format!("CUSTOM GENERATION (Count: {})", app.custom_planet_count), custom_style),
+            Span::styled(
+                format!("CUSTOM GENERATION (Count: {})", app.custom_planet_count),
+                custom_style,
+            ),
         ]),
     ];
 
@@ -110,7 +113,7 @@ fn render_generation_menu(app: &App, frame: &mut Frame, area: Rect, theme: &Them
                 .title(" Galaxy Generation Mode ")
                 .border_style(theme.border()),
         );
-    
+
     frame.render_widget(menu, area);
 }
 
