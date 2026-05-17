@@ -40,7 +40,8 @@ fn apply_command(app: &mut App, command: Command) -> Result<(), String> {
         Command::StartGame => {
             let mattia_explorers = vec![(0, 0)];
             let tommy_explorers = vec![(1, 1)];
-            app.orchestrator.start_all(&mattia_explorers, &tommy_explorers)?;
+            app.orchestrator
+                .start_all(&mattia_explorers, &tommy_explorers)?;
             app.set_game_state(GameState::Running);
             app.get_game_info()?;
             app.reset_sim_clock(std::time::Instant::now());

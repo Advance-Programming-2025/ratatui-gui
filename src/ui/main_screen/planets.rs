@@ -26,22 +26,21 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect, theme:
                         .map(|e| e.current_planet_id);
                     let allowed = match explorer_planet {
                         Some(pid) => {
-                            row.id == pid
-                                || app.galaxy_topology[row.id as usize][pid as usize]
+                            row.id == pid || app.galaxy_topology[row.id as usize][pid as usize]
                         }
                         None => false,
                     };
                     if allowed {
                         theme.value()
                     } else {
-                        theme.blocked()
+                        theme.danger()
                     }
                 }
                 UiMode::Normal => {
                     if row.highlight_neighbor {
-                        theme.danger()
-                    } else {
                         theme.value()
+                    } else {
+                        theme.danger()
                     }
                 }
             };

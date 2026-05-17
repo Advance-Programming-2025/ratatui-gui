@@ -42,7 +42,7 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame, theme: &Theme) {
         app.ui.selectors.explorers.last_selected(),
         app.ui.selectors.planets.last_selected(),
     ) {
-        (Some(_), Some(_))=>{
+        (Some(_), Some(_)) => {
             render_extra_info_explorer(app, frame, explorers_info_area, theme);
             render_extra_info_planet(app, frame, planets_info_area, theme);
         }

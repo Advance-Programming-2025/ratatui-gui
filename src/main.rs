@@ -1,14 +1,14 @@
 mod app;
-mod game_state;
-mod loops;
 mod commands;
 mod controller;
+mod game_state;
 mod input;
-mod ui_state;
+mod loops;
+mod selector;
 mod tui_loggers;
 mod ui;
+mod ui_state;
 mod view_models;
-mod selector;
 
 use std::sync::Arc;
 

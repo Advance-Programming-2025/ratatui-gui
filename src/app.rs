@@ -42,7 +42,7 @@ impl App {
     pub fn new(mut orchestrator: Orchestrator, log_buffer: Arc<LogBuffer>) -> Result<Self, String> {
         Ok(Self {
             gamestate: GameState::WaitingStart,
-            planets_info:  orchestrator.get_planets_info(),
+            planets_info: orchestrator.get_planets_info(),
             explorers_info: orchestrator.get_explorer_states(),
             galaxy_topology: orchestrator.get_galaxy_topology(),
             incoming_sunray_asteroids_queue: VecDeque::new(),
@@ -198,7 +198,6 @@ impl App {
 
 // Selector methods for explorers
 impl App {
-    
     pub(crate) fn get_bag_selected_explorer(&self) -> String {
         match self.ui.selectors.explorers.last_selected() {
             Some(selected) => match self.explorers_info.get_bag(&(selected as u32)) {

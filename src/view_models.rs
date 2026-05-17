@@ -107,6 +107,7 @@ fn is_neighbor_of_selection(app: &App, row_planet_id: u32) -> bool {
                 None => false,
             }
         }
+        (None, None) => true,
         _ => false,
     }
 }

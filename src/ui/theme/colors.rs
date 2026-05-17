@@ -59,7 +59,6 @@ impl Palette {
 
             // border: Color::DarkGray,
             // border_active: Color::LightRed,
-
             bg_highlight: Color::DarkGray,
         }
     }

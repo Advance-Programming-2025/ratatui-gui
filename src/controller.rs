@@ -92,7 +92,10 @@ impl Controller {
             Action::Left => {
                 app.ui.focus = Focus::Planets;
                 app.ui.selectors.explorers.clear();
-                app.ui.selectors.planets.restore_last(app.planets_info.len());
+                app.ui
+                    .selectors
+                    .planets
+                    .restore_last(app.planets_info.len());
                 Transition::none()
             }
             Action::Right => {
@@ -124,7 +127,10 @@ impl Controller {
                 if let Some(explorer_id) = app.ui.selectors.explorers.selected().map(|i| i as u32) {
                     let return_focus = app.ui.focus;
                     app.ui.focus = Focus::Planets;
-                    app.ui.selectors.planets.restore_last(app.planets_info.len());
+                    app.ui
+                        .selectors
+                        .planets
+                        .restore_last(app.planets_info.len());
                     app.ui.mode = UiMode::MoveExplorer {
                         explorer_id,
                         return_focus,
@@ -142,17 +148,11 @@ impl Controller {
     fn handle_move_explorer(&mut self, app: &mut App, action: Action) -> Transition {
         match action {
             Action::Up => {
-                app.ui
-                    .selectors
-                    .planets
-                    .move_up(app.planets_info.len());
+                app.ui.selectors.planets.move_up(app.planets_info.len());
                 Transition::none()
             }
             Action::Down => {
-                app.ui
-                    .selectors
-                    .planets
-                    .move_down(app.planets_info.len());
+                app.ui.selectors.planets.move_down(app.planets_info.len());
                 Transition::none()
             }
             Action::Cancel => {
@@ -182,12 +182,10 @@ impl Controller {
                 app.ui.selectors.planets.clear();
                 app.ui.overlays.banner = None;
                 Transition {
-                    commands: vec![
-                        Command::MoveExplorer {
-                            explorer_id,
-                            planet_id,
-                        },
-                    ],
+                    commands: vec![Command::MoveExplorer {
+                        explorer_id,
+                        planet_id,
+                    }],
                 }
             }
             _ => {
@@ -203,7 +201,10 @@ impl Controller {
                 commands: vec![Command::StopAll, Command::SetGameState(GameState::Paused)],
             },
             GameState::Paused => Transition {
-                commands: vec![Command::RestartAll, Command::SetGameState(GameState::Running)],
+                commands: vec![
+                    Command::RestartAll,
+                    Command::SetGameState(GameState::Running),
+                ],
             },
             _ => Transition::none(),
         }
@@ -219,7 +220,11 @@ impl Controller {
     fn move_focused_down(&mut self, app: &mut App) {
         match app.ui.focus {
             Focus::Planets => app.ui.selectors.planets.move_down(app.planets_info.len()),
-            Focus::Explorers => app.ui.selectors.explorers.move_down(app.explorers_info.len()),
+            Focus::Explorers => app
+                .ui
+                .selectors
+                .explorers
+                .move_down(app.explorers_info.len()),
         }
     }
 }
