@@ -1,6 +1,10 @@
 mod app;
 mod game_state;
 mod loops;
+mod commands;
+mod controller;
+mod input;
+mod ui_state;
 mod tui_loggers;
 mod ui;
 mod view_models;

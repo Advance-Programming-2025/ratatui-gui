@@ -8,7 +8,7 @@ use std::{
 use crate::{game_state::GameState, tui_loggers::LogBuffer};
 use omc_galaxy::settings;
 
-use crate::selector::Selector;
+use crate::ui_state::AppUi;
 
 pub struct App {
     //State of the game
@@ -30,21 +30,8 @@ pub struct App {
     //Game logs
     pub log_entries: Arc<LogBuffer>,
 
-    //UI planet selector variables
-    pub(crate) general_selector: Selector,
-    // pub(crate) planet_selector: TableState,
-    // pub(crate) explorer_selector: TableState,
-
-    //UI log overlay toggle
-    pub show_log_overlay: bool,
-    pub planet_typed: Option<u32>,
-
-    /// Tracks the currently highlighted menu option on the start screen.
-    /// 0 for Random, 1 for Custom.
-    pub(crate) selected_mode: u8,
-
-    /// Stores the user-defined number of planets for Custom mode.
-    pub(crate) custom_planet_count: u32,
+    //UI state machine and selectors
+    pub(crate) ui: AppUi,
 }
 
 impl App {
@@ -64,15 +51,7 @@ impl App {
             // frame_rate: Duration::from_millis(33), // UI fluida a 30 FPS
             log_entries: log_buffer,
 
-            general_selector: Selector::new(0, 0),
-            // planet_selector: TableState::default(),
-            // explorer_selector: TableState::default(),
-
-            show_log_overlay: false,
-            planet_typed: None,
-
-            selected_mode: 0,
-            custom_planet_count: 0,
+            ui: AppUi::new(),
         })
     }
 
@@ -127,25 +106,25 @@ impl App {
 impl App {
     /// Cambia la modalità selezionata (0 per Random, 1 per Custom)
     pub fn toggle_generation_mode(&mut self) {
-        if self.selected_mode == 0 {
-            self.selected_mode = 1;
+        if self.ui.start.selected_mode == 0 {
+            self.ui.start.selected_mode = 1;
         } else {
-            self.selected_mode = 0;
+            self.ui.start.selected_mode = 0;
         }
     }
 
     /// Incrementa o decrementa il numero di pianeti per la modalità Custom
     /// Mantiene il valore in un range ragionevole (es. 1-50)
     pub fn adjust_custom_planets(&mut self, delta: i32) {
-        let current = self.custom_planet_count as i32;
+        let current = self.ui.start.custom_planet_count as i32;
         let new_value = (current + delta).clamp(1, 50);
-        self.custom_planet_count = new_value as u32;
+        self.ui.start.custom_planet_count = new_value as u32;
     }
 }
 // Selector for the planet table
 impl App {
     pub(crate) fn get_rocket_of_selected_planet(&self) -> String {
-        match self.general_selector.get_last_planet_selected() {
+        match self.ui.selectors.planets.last_selected() {
             Some(selected) => {
                 if self.planets_info.get_info(selected as u32).unwrap().rocket {
                     "AVAILABLE".to_string()
@@ -157,7 +136,7 @@ impl App {
         }
     }
     pub(crate) fn get_cells_info_selected_planet(&self) -> String {
-        match self.general_selector.get_last_planet_selected(){
+        match self.ui.selectors.planets.last_selected() {
             Some(selected) => {
                 let planet = self.planets_info.get_info(selected as u32).unwrap();
                 format!(
@@ -170,13 +149,13 @@ impl App {
         }
     }
     pub(crate) fn get_id_selected_planet(&self) -> String {
-        match self.general_selector.get_last_planet_selected() {
+        match self.ui.selectors.planets.last_selected() {
             Some(selected) => selected.to_string(),
             None => "None".to_string(),
         }
     }
     pub(crate) fn get_name_selected_planet(&self) -> String {
-        if let Some(planet) = self.general_selector.get_last_planet_selected() {
+        if let Some(planet) = self.ui.selectors.planets.last_selected() {
             format!(
                 "{:?}",
                 self.planets_info.get_info(planet as u32).unwrap().name
@@ -191,7 +170,7 @@ impl App {
 impl App {
     
     pub(crate) fn get_bag_selected_explorer(&self) -> String {
-        match self.general_selector.get_last_explorer_selected(){
+        match self.ui.selectors.explorers.last_selected() {
             Some(selected) => match self.explorers_info.get_bag(&(selected as u32)) {
                 Some(bag) => bag_to_string(bag),
                 None => "None".to_string(),
@@ -200,7 +179,7 @@ impl App {
         }
     }
     pub(crate) fn get_planet_selected_explorer(&self) -> String {
-        match self.general_selector.get_last_explorer_selected() {
+        match self.ui.selectors.explorers.last_selected() {
             Some(selected) => match self.explorers_info.get_planet(&(selected as u32)) {
                 Some(planet_id) => planet_id.to_string(),
                 None => "None".to_string(),
@@ -209,7 +188,7 @@ impl App {
         }
     }
     pub(crate) fn get_id_selected_explorer(&self) -> String {
-        match self.general_selector.get_last_explorer_selected() {
+        match self.ui.selectors.explorers.last_selected() {
             Some(selected) => match self.explorers_info.get_id(&(selected as u32)) {
                 Some(id) => id.to_string(),
                 None => "None".to_string(),

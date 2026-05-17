@@ -91,8 +91,8 @@ fn energy_bar(charged: usize, total: usize) -> String {
 /// Neighbor detection on current explorer or planet selection.
 fn is_neighbor_of_selection(app: &App, row_planet_id: u32) -> bool {
     match (
-        app.general_selector.get_planet_selected(),
-        app.general_selector.get_explorer_selected(),
+        app.ui.selectors.planets.selected(),
+        app.ui.selectors.explorers.selected(),
     ) {
         (Some(selected_planet), None) => {
             app.galaxy_topology[row_planet_id as usize][selected_planet]

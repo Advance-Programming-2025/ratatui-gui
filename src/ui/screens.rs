@@ -74,11 +74,8 @@ fn render_intro_text(frame: &mut Frame, area: Rect, theme: &Theme) {
 /// Render mode selection menu.
 /// Reads selection state from `App` and highlights active choice.
 fn render_generation_menu(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
-    // Note: Assuming app.selected_mode: 0 = Random, 1 = Custom
-    // Assuming app.custom_planet_count for the custom input display
-
-    let is_random = app.selected_mode == 0;
-    let is_custom = app.selected_mode == 1;
+    let is_random = app.ui.start.selected_mode == 0;
+    let is_custom = app.ui.start.selected_mode == 1;
 
     let random_style = if is_random {
         theme.header()
@@ -100,7 +97,10 @@ fn render_generation_menu(app: &App, frame: &mut Frame, area: Rect, theme: &Them
         Line::from(vec![
             Span::styled(if is_custom { " > " } else { "   " }, custom_style),
             Span::styled(
-                format!("CUSTOM GENERATION (Count: {})", app.custom_planet_count),
+                format!(
+                    "CUSTOM GENERATION (Count: {})",
+                    app.ui.start.custom_planet_count
+                ),
                 custom_style,
             ),
         ]),

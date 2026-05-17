@@ -1,139 +1,132 @@
-use ratatui::widgets::{TableState};
+//! Reusable selection cursors for stateful widgets.
+//! Provides minimal row navigation without embedding domain logic.
 
-enum SelectorState{
-    Planet,
-    Explorer,
+use ratatui::widgets::TableState;
+
+/// Generic row selector used by tables and lists.
+#[derive(Debug, Clone)]
+pub struct ListSelector {
+    state: TableState,
+    last_selected: Option<usize>,
 }
 
-pub(crate) struct Selector{
-    selector_state: SelectorState,
-    pub(crate)planet_selector: TableState,
-    pub(crate)explorer_selector: TableState,
-
-    last_planet_selected: Option<usize>,
-    last_explorer_selected:Option<usize>,
-    len_planets:usize,
-    len_explorers:usize,
-}
-
-impl Selector{
-    pub(crate)fn new(len_planets:usize, len_explorers:usize)->Self{
-        Self { 
-            selector_state: SelectorState::Planet, 
-            planet_selector: TableState::default(), 
-            explorer_selector: TableState::default(), 
-            last_planet_selected: None, 
-            last_explorer_selected: None, 
-            len_planets,
-            len_explorers,
+impl ListSelector {
+    /// Create empty selector with no selection.
+    pub fn new() -> Self {
+        Self {
+            state: TableState::default(),
+            last_selected: None,
         }
     }
 
-    pub(crate)fn go_down(&mut self){
-        match self.selector_state{
-            SelectorState::Planet=>{
-                match self.planet_selector.selected(){
-                    Some(id)=>{
-                        if id+1 < self.len_planets{
-                            self.planet_selector.select(Some(id+1));
-                            self.last_planet_selected = self.planet_selector.selected();
-                        }
-                    },
-                    None=>{
-                        self.planet_selector.select(Some(0));
-                        self.last_planet_selected = self.planet_selector.selected();
-                    },
-                }
-            },
-            SelectorState::Explorer=>{
-                match self.explorer_selector.selected(){
-                    Some(id)=>{
-                        if id+1 < self.len_explorers{
-                            self.explorer_selector.select(Some(id+1));
-                            self.last_explorer_selected = self.explorer_selector.selected();
-                        }
-                    },
-                    None=>{self.explorer_selector.select(Some(0));
-                            self.last_explorer_selected = self.explorer_selector.selected()},
-                }
+    /// Current selected row index.
+    pub fn selected(&self) -> Option<usize> {
+        self.state.selected()
+    }
+
+    /// Last non-`None` selection seen.
+    pub fn last_selected(&self) -> Option<usize> {
+        self.last_selected
+    }
+
+    /// Last selection as `u32` for id usage.
+    pub fn last_selected_u32(&self) -> Option<u32> {
+        self.last_selected.map(|i| i as u32)
+    }
+
+    /// Clear selection, keep last selection for restoring later.
+    pub fn clear(&mut self) {
+        self.state.select(None);
+    }
+
+    /// Restore last selection if valid, otherwise select last row.
+    pub fn restore_last(&mut self, len: usize) {
+        if len == 0 {
+            self.clear();
+            return;
+        }
+
+        if let Some(i) = self.last_selected {
+            if i < len {
+                self.state.select(Some(i));
+                return;
             }
         }
-        
-    }
-    pub(crate)fn go_up(&mut self){
-        match self.selector_state{
-            SelectorState::Planet=>{
-                match self.planet_selector.selected(){
-                    Some(id)=>{
-                        if id > 0{
-                            self.planet_selector.select(Some(id-1));
-                            self.last_planet_selected = self.planet_selector.selected();
-                        }
-                    },
-                    None=>{
-                        self.planet_selector.select(Some(0));
-                        self.last_planet_selected = self.planet_selector.selected();
-                    }
-                }
-            },
-            SelectorState::Explorer=>{
-                match self.explorer_selector.selected(){
-                    Some(id)=>{
-                        if id > 0{
-                            self.explorer_selector.select(Some(id-1));
-                            self.last_explorer_selected = self.explorer_selector.selected();
-                        }
-                    },
-                    None=>{
-                        self.explorer_selector.select(Some(0));
-                        self.last_explorer_selected = self.explorer_selector.selected();
-                    },
-                }
-            },
-        }    
+
+        self.select_first(len);
     }
 
-    pub(crate)fn go_right(&mut self){
-        match (&mut self.planet_selector.selected(), &mut self.explorer_selector.selected()){
-            (None, None)=> self.go_down(),
-            (Some(_), None)=>{
-                self.selector_state = SelectorState::Explorer;
-                self.planet_selector.select(None);
-                
-                match self.last_explorer_selected{
-                    Some(id)=>self.explorer_selector.select(Some(id)),
-                    None=>self.go_down(),
-                }
-            },
-            (_, _)=>{},
+    /// Select first row if list non-empty.
+    pub fn select_first(&mut self, len: usize) {
+        if len == 0 {
+            self.clear();
+            return;
         }
+
+        self.state.select(Some(0));
+        self.last_selected = self.state.selected().or(self.last_selected);
     }
-    pub(crate)fn go_left(&mut self){
-        match (&self.planet_selector.selected(), &self.explorer_selector.selected()){
-            (None, None)=> self.go_down(),
-            (None, Some(_))=>{
-                self.selector_state = SelectorState::Planet;
-                self.explorer_selector.select(None);
-                match self.last_planet_selected{
-                    Some(id)=>self.planet_selector.select(Some(id)),
-                    None=>self.go_down(),
-                }
-            },
-            (_, _)=>{},
+
+    /// Select last row if list non-empty.
+    pub fn select_last(&mut self, len: usize) {
+        if len == 0 {
+            self.clear();
+            return;
         }
+
+        self.state.select(Some(len - 1));
+        self.last_selected = self.state.selected().or(self.last_selected);
     }
 
-    pub(crate)fn get_planet_selected(&self)->Option<usize>{
-        self.planet_selector.selected()
-    }
-    pub(crate)fn get_explorer_selected(&self)->Option<usize>{
-        self.explorer_selector.selected()
+    /// Move selection up within bounds.
+    pub fn move_up(&mut self, len: usize) {
+        if len == 0 {
+            self.clear();
+            return;
+        }
+
+        match self.state.selected() {
+            Some(i) if i > 0 => self.state.select(Some(i - 1)),
+            Some(_) => {}
+            None => self.state.select(Some(0)),
+        }
+        self.last_selected = self.state.selected().or(self.last_selected);
     }
 
-    pub(crate)fn get_last_planet_selected(&self)->Option<usize>{
-        self.last_planet_selected
+    /// Move selection down within bounds.
+    pub fn move_down(&mut self, len: usize) {
+        if len == 0 {
+            self.clear();
+            return;
+        }
+
+        match self.state.selected() {
+            Some(i) if i + 1 < len => self.state.select(Some(i + 1)),
+            Some(_) => {}
+            None => self.state.select(Some(0)),
+        }
+        self.last_selected = self.state.selected().or(self.last_selected);
     }
-    pub(crate)fn get_last_explorer_selected(&self)->Option<usize>{
-        self.last_explorer_selected
+
+    /// Mutable `TableState` for `render_stateful_widget`.
+    pub fn state_mut(&mut self) -> &mut TableState {
+        &mut self.state
+    }
+}
+
+/// All UI selectors owned by `AppUi`.
+#[derive(Debug, Clone)]
+pub struct Selectors {
+    pub planets: ListSelector,
+    pub explorers: ListSelector,
+}
+
+impl Selectors {
+    /// Create selectors for all lists.
+    pub fn new() -> Self {
+        Self {
+            planets: ListSelector::new(),
+            explorers: ListSelector::new(),
+        }
     }
 }
