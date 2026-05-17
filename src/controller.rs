@@ -117,15 +117,21 @@ impl Controller {
                 Transition::none()
             }
             Action::MoveMode => {
-                if let Some(explorer_id) = app.ui.selectors.explorers.last_selected_u32() {
+                if app.ui.focus != Focus::Explorers {
+                    return Transition::none();
+                }
+
+                if let Some(explorer_id) = app.ui.selectors.explorers.selected().map(|i| i as u32) {
+                    let return_focus = app.ui.focus;
+                    app.ui.focus = Focus::Planets;
+                    app.ui.selectors.planets.restore_last(app.planets_info.len());
                     app.ui.mode = UiMode::MoveExplorer {
                         explorer_id,
-                        return_focus: app.ui.focus,
+                        return_focus,
                     };
-                    app.ui.overlays.banner =
-                        Some("Select planet to move to. Enter confirm. Esc abort.".to_string());
+                    return Transition::one(Command::StopExplorerAI { explorer_id });
                 } else {
-                    app.ui.overlays.banner = Some("Select explorer first.".to_string());
+                    app.ui.overlays.banner = None;
                 }
                 Transition::none()
             }
@@ -150,7 +156,13 @@ impl Controller {
                 Transition::none()
             }
             Action::Cancel => {
+                let return_focus = match app.ui.mode {
+                    UiMode::MoveExplorer { return_focus, .. } => return_focus,
+                    _ => Focus::Explorers,
+                };
                 app.ui.mode = UiMode::Normal;
+                app.ui.focus = return_focus;
+                app.ui.selectors.planets.clear();
                 app.ui.overlays.banner = None;
                 Transition::none()
             }
@@ -166,15 +178,20 @@ impl Controller {
                 };
                 let planet_id = planet_idx as u32;
                 app.ui.mode = UiMode::Normal;
+                app.ui.focus = Focus::Explorers;
+                app.ui.selectors.planets.clear();
                 app.ui.overlays.banner = None;
-                Transition::one(Command::MoveExplorer {
-                    explorer_id,
-                    planet_id,
-                })
+                Transition {
+                    commands: vec![
+                        Command::MoveExplorer {
+                            explorer_id,
+                            planet_id,
+                        },
+                    ],
+                }
             }
             _ => {
-                app.ui.overlays.banner =
-                    Some("Invalid key. Enter confirm. Esc abort.".to_string());
+                app.ui.overlays.banner = None;
                 Transition::none()
             }
         }

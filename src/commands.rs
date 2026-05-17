@@ -10,6 +10,7 @@ pub enum Command {
     StartGame,
     StopAll,
     RestartAll,
+    StopExplorerAI { explorer_id: u32 },
     ToggleLog,
     AdjustCustomPlanets(i32),
     ToggleGenerationMode,
@@ -17,4 +18,3 @@ pub enum Command {
     QueueSunray { planet_id: u32 },
     MoveExplorer { explorer_id: u32, planet_id: u32 },
 }
-

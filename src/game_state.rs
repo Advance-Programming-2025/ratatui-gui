@@ -43,12 +43,16 @@ fn apply_command(app: &mut App, command: Command) -> Result<(), String> {
             app.orchestrator.start_all(&mattia_explorers, &tommy_explorers)?;
             app.set_game_state(GameState::Running);
             app.get_game_info()?;
+            app.reset_sim_clock(std::time::Instant::now());
         }
         Command::StopAll => {
             app.orchestrator.stop_all()?;
         }
         Command::RestartAll => {
             app.orchestrator.restart_all()?;
+        }
+        Command::StopExplorerAI { explorer_id } => {
+            app.orchestrator.send_stop_explorer_from_gui(explorer_id)?;
         }
         Command::ToggleLog => {
             app.ui.overlays.show_log = !app.ui.overlays.show_log;
