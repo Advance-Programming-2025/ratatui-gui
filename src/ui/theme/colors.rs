@@ -19,7 +19,7 @@ pub struct Palette {
     /// Foreground for warnings and attention-grabbing elements.
     pub fg_warning: Color,
     /// Foreground for error or danger states.
-    // pub fg_danger: Color,
+    pub fg_danger: Color,
     /// Foreground for success states.
     // pub fg_success: Color,
     /// Foreground for informational states.
@@ -50,7 +50,7 @@ impl Palette {
             // fg_muted: Color::Gray,
             // fg_accent: Color::Cyan,
             fg_warning: Color::Yellow,
-            // fg_danger: Color::Red,
+            fg_danger: Color::Red,
             // fg_success: Color::Green,
             // fg_info: Color::Blue,
             // fg_info_dim: Color::LightCyan,

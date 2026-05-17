@@ -25,6 +25,10 @@ pub struct App {
     pub(crate) exit: bool,
     pub(crate) send_rate: Duration,
     pub(crate) last_tick: Instant,
+    /// Elapsed simulation time (paused-aware).
+    pub(crate) sim_elapsed: Duration,
+    /// Last wall-clock sample used to advance `sim_elapsed`.
+    pub(crate) sim_last_sample: Instant,
     // pub(crate) frame_rate: Duration, // Useful not to overload the CPU
 
     //Game logs
@@ -48,6 +52,8 @@ impl App {
             exit: false,
             last_tick: Instant::now(),
             send_rate: Duration::from_millis(1000),
+            sim_elapsed: Duration::from_secs(0),
+            sim_last_sample: Instant::now(),
             // frame_rate: Duration::from_millis(33), // UI fluida a 30 FPS
             log_entries: log_buffer,
 
@@ -76,6 +82,30 @@ impl App {
         self.sunray_rate = settings::get_sunray_probability();
         self.galaxy_topology = self.orchestrator.get_galaxy_topology();
         Ok(())
+    }
+
+    /// Advance simulation clock when running; freeze when paused/other.
+    pub(crate) fn tick_sim_clock(&mut self, now: Instant) {
+        if self.gamestate == GameState::Running {
+            let delta = now.saturating_duration_since(self.sim_last_sample);
+            self.sim_elapsed = self.sim_elapsed.saturating_add(delta);
+        }
+        self.sim_last_sample = now;
+    }
+
+    /// Reset simulation clock to zero.
+    pub(crate) fn reset_sim_clock(&mut self, now: Instant) {
+        self.sim_elapsed = Duration::from_secs(0);
+        self.sim_last_sample = now;
+    }
+
+    /// Format elapsed simulation time as `hh:mm:ss`.
+    pub(crate) fn sim_time_hms(&self) -> String {
+        let total = self.sim_elapsed.as_secs();
+        let hours = total / 3600;
+        let minutes = (total % 3600) / 60;
+        let seconds = total % 60;
+        format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
     }
 
     pub fn initialize_by_file(&mut self) -> Result<(), String> {

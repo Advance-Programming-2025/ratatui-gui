@@ -29,6 +29,14 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect, the
             Span::raw("- Select down Explorer/Planet").value(theme),
         ]),
         Line::from(vec![
+            Span::styled("  ← ", theme.nav()),
+            Span::raw("- Focus Planets").value(theme),
+        ]),
+        Line::from(vec![
+            Span::styled("  → ", theme.nav()),
+            Span::raw("- Focus Explorers").value(theme),
+        ]),
+        Line::from(vec![
             Span::styled("  L ", theme.success().bold()),
             Span::raw("- Toggle Log Overlay").value(theme),
         ]),
@@ -49,12 +57,16 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect, the
             Span::raw("- Send Asteroid(select planet first)").value(theme),
         ]),
         Line::from(vec![
-            Span::styled("  1..9 ", theme.key()),
-            Span::raw("- Type Destination Planet ID(select explorer first)").value(theme),
+            Span::styled("  M ", theme.key()),
+            Span::raw("- Move Explorer(select explorer first)").value(theme),
         ]),
         Line::from(vec![
             Span::styled("  ENTER ", theme.key()),
-            Span::raw("- Confirm Destination Planet ID").value(theme),
+            Span::raw("- Confirm selection / move").value(theme),
+        ]),
+        Line::from(vec![
+            Span::styled("  ESC ", theme.key()),
+            Span::raw("- Abort move").value(theme),
         ]),
     ];
 

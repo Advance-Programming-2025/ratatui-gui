@@ -44,6 +44,7 @@ impl App {
     /// Loop: tick management and orchestrator
     fn active_loop(&mut self, terminal: &mut DefaultTerminal) -> Result<(), String> {
         while !self.exit && self.gamestate == GameState::Running {
+            self.tick_sim_clock(Instant::now());
             // --- 1. INPUT UTENTE (PRIMA DI TUTTO per massima reattività) ---
             handle_game_state(self)?;
 
@@ -92,6 +93,7 @@ impl App {
     /// Pause loop: only consume UI messages, time frozen
     fn paused_loop(&mut self, terminal: &mut DefaultTerminal) -> Result<(), String> {
         while !self.exit && self.gamestate == GameState::Paused {
+            self.tick_sim_clock(Instant::now());
             // --- 1. INPUT UTENTE (PRIMA DI TUTTO per massima reattività) ---
             handle_game_state(self)?;
 

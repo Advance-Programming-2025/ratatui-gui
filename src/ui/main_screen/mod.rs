@@ -60,10 +60,10 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame, theme: &Theme) {
         }
     }
 
-    instructions::render_instructions(app, frame, other_area, theme);
-
     if app.ui.overlays.show_log {
         log::render_log_overlay(app, frame, other_area, theme);
+    } else {
+        instructions::render_instructions(app, frame, other_area, theme);
     }
 }
 

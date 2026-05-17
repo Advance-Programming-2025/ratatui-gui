@@ -52,6 +52,13 @@ impl Theme {
             .add_modifier(Modifier::BOLD)
     }
 
+    /// Style for blocked or invalid choices.
+    pub fn blocked(&self) -> Style {
+        Style::default()
+            .fg(self.palette.fg_danger)
+            .add_modifier(Modifier::BOLD)
+    }
+
     /// Style for success states.
     pub fn success(&self) -> Style {
         Style::default().fg(self.palette.matrix_green)

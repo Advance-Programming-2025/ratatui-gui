@@ -6,6 +6,7 @@ use ratatui::{
 
 use crate::app::App;
 use crate::ui::{layout, theme::Theme};
+use crate::ui_state::UiMode;
 use crate::view_models;
 
 /// Render planets table (list view).
@@ -17,10 +18,32 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect, theme:
     let rows: Vec<Row> = view_models::planet_rows(app)
         .into_iter()
         .map(|row| {
-            let row_style = if row.highlight_neighbor {
-                theme.danger()
-            } else {
-                theme.value()
+            let row_style = match app.ui.mode {
+                UiMode::MoveExplorer { explorer_id, .. } => {
+                    let explorer_planet = app
+                        .explorers_info
+                        .get(&explorer_id)
+                        .map(|e| e.current_planet_id);
+                    let allowed = match explorer_planet {
+                        Some(pid) => {
+                            row.id == pid
+                                || app.galaxy_topology[row.id as usize][pid as usize]
+                        }
+                        None => false,
+                    };
+                    if allowed {
+                        theme.value()
+                    } else {
+                        theme.blocked()
+                    }
+                }
+                UiMode::Normal => {
+                    if row.highlight_neighbor {
+                        theme.danger()
+                    } else {
+                        theme.value()
+                    }
+                }
             };
             Row::new(vec![
                 Cell::from(row.id.to_string()),
