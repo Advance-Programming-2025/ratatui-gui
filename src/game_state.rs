@@ -1,4 +1,4 @@
-use crate::app::App;
+use crate::{app::App, selector::Selector};
 use crossterm::event::{self, Event, KeyCode};
 use std::time::Duration;
 
@@ -33,6 +33,8 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                         app.orchestrator
                             .start_all(&mattia_explorers, &tommy_explorers)?;
                         app.set_game_state(GameState::Running);
+                        app.get_game_info()?;
+                        app.general_selector = Selector::new(app.planets_info.len(), app.explorers_info.len());
                     }
                     (KeyCode::Char('p'), GameState::Running) => {
                         app.orchestrator.stop_all()?;
@@ -65,26 +67,16 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                     }
                     // Navigation events
                     (KeyCode::Up, GameState::Running) | (KeyCode::Up, GameState::Paused) => {
-                        match (
-                            app.explorer_selector.selected(),
-                            app.planet_selector.selected(),
-                        ) {
-                            (Some(_), None) => app.decrement_explorer_selector(),
-                            (None, Some(_)) => app.decrement_planet_selector(),
-                            (None, None) => app.decrement_planet_selector(),
-                            _ => {}
-                        }
+                        app.general_selector.go_up();
                     }
                     (KeyCode::Down, GameState::Running) | (KeyCode::Down, GameState::Paused) => {
-                        match (
-                            app.explorer_selector.selected(),
-                            app.planet_selector.selected(),
-                        ) {
-                            (Some(_), None) => app.increment_explorer_selector(),
-                            (None, Some(_)) => app.increment_planet_selector(),
-                            (None, None) => app.increment_explorer_selector(),
-                            _ => {}
-                        }
+                        app.general_selector.go_down();
+                    }
+                    (KeyCode::Right, GameState::Running) | (KeyCode::Right, GameState::Paused) => {
+                        app.general_selector.go_right();
+                    }
+                    (KeyCode::Left, GameState::Running) | (KeyCode::Left, GameState::Paused) => {
+                        app.general_selector.go_left();
                     }
 
                     // Toggle log overlay with 'L'
@@ -100,7 +92,7 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                     // Send asteroid with 'A' (for testing)
                     (KeyCode::Char('a'), GameState::Running)
                     | (KeyCode::Char('a'), GameState::Paused) => {
-                        match app.planet_selector.selected() {
+                        match app.general_selector.get_planet_selected() {
                             Some(planet_id) => {
                                 app.add_incoming_asteroid_for_planet(planet_id as u32)
                             }
@@ -110,14 +102,14 @@ pub fn handle_game_state(app: &mut App) -> Result<(), String> {
                     // Send sunray with 'S' (for testing)
                     (KeyCode::Char('s'), GameState::Running)
                     | (KeyCode::Char('s'), GameState::Paused) => {
-                        match app.planet_selector.selected() {
+                        match app.general_selector.get_planet_selected() {
                             Some(planet_id) => app.add_incoming_sunray_for_planet(planet_id as u32),
                             None => {}
                         }
                     }
                     // Move the explorer to another planet with selecting the explorer and then typing the planet id and press enter
                     (KeyCode::Enter, GameState::Running) | (KeyCode::Enter, GameState::Paused) => {
-                        if let Some(explorer_id) = app.explorer_selector.selected() {
+                        if let Some(explorer_id) = app.general_selector.get_explorer_selected() {
                             //type the planet id in the terminal
                             if let Some(planet_id) = app.planet_typed {
                                 if app.planets_info.contains(&planet_id) {

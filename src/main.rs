@@ -4,6 +4,7 @@ mod loops;
 mod tui_loggers;
 mod ui;
 mod view_models;
+mod selector;
 
 use std::sync::Arc;
 

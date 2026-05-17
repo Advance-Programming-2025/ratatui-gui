@@ -43,5 +43,5 @@ pub fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect, theme:
         )
         .row_highlight_style(theme.row_highlight());
 
-    frame.render_stateful_widget(table, area, &mut app.planet_selector);
+    frame.render_stateful_widget(table, area, &mut app.general_selector.planet_selector);
 }

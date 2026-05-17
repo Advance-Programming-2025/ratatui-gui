@@ -40,9 +40,13 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame, theme: &Theme) {
     planets::render_planets_table(app, frame, planets_list_area, theme);
 
     match (
-        app.explorer_selector.selected(),
-        app.planet_selector.selected(),
+        app.general_selector.get_last_explorer_selected(),
+        app.general_selector.get_last_planet_selected(),
     ) {
+        (Some(_), Some(_))=>{
+            render_extra_info_explorer(app, frame, explorers_info_area, theme);
+            render_extra_info_planet(app, frame, planets_info_area, theme);
+        }
         (Some(_), _) => {
             render_extra_info_explorer(app, frame, explorers_info_area, theme);
             render_extra_info_none(frame, planets_info_area, theme);

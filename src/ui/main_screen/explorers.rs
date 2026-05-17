@@ -33,5 +33,5 @@ pub(crate) fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect, the
         .block(Block::bordered().title(" Explorers ").panel_active(theme))
         .row_highlight_style(theme.row_highlight());
 
-    frame.render_stateful_widget(table, area, &mut app.explorer_selector);
+    frame.render_stateful_widget(table, area, &mut app.general_selector.explorer_selector);
 }
