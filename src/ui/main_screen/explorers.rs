@@ -10,6 +10,7 @@ use crate::ui::{
     theme::{BlockThemeExt, Theme},
 };
 use crate::view_models;
+use super::*;
 
 /// Render explorers table (list view).
 pub(crate) fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect, theme: &Theme) {
@@ -35,3 +36,34 @@ pub(crate) fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect, the
 
     frame.render_stateful_widget(table, area, app.ui.selectors.explorers.state_mut());
 }
+
+/// Render explorer detail panel.
+pub(crate) fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
+    let block = Block::bordered()
+        .title(" Extra Info - Explorer ")
+        .panel(theme);
+
+    let inner_area = block.inner(area);
+    frame.render_widget(block, area);
+
+    let details = vec![
+        Line::from(""),
+        Line::from(vec![
+            Span::raw("  ID Explorer: ").muted(theme),
+            Span::styled(
+                format!("{}", app.get_id_selected_explorer()),
+                theme.value().bold(),
+            ),
+        ]),
+        Line::from(vec![
+            Span::raw("  Current Planet: ").muted(theme),
+            Span::styled(app.get_planet_selected_explorer(), theme.value()),
+        ]),
+        Line::from(vec![
+            Span::raw("  Bag: ").muted(theme),
+            Span::styled(app.get_bag_selected_explorer(), theme.value()),
+        ]),
+    ];
+    frame.render_widget(Paragraph::new(details), inner_area);
+}
+

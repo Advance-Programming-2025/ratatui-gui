@@ -14,7 +14,7 @@ pub struct App {
     //State of the game
     pub(crate) gamestate: GameState,
     //Data about the game
-    pub(crate) planets_info: PlanetInfoMap, //Planet Info
+    pub(crate) planets_info: PlanetInfoMap, //Planet Info 
     pub(crate) explorers_info: ExplorerInfoMap,
     pub(crate) sunray_rate: u32,
     pub(crate) galaxy_topology: Vec<Vec<bool>>, // Esempio: ID pianeta -> Vicini
@@ -194,6 +194,27 @@ impl App {
             "None".to_string()
         }
     }
+    pub(crate) fn get_supported_resource(&self) -> String {
+        if let Some(planet) = self.ui.selectors.planets.last_selected() {
+            format!(
+                "{:?}",
+                self.planets_info.get_info(planet as u32).unwrap().supported_resources
+            )
+        } else {
+            "None".to_string()
+        }
+    }
+    pub(crate) fn get_supported_combination(&self) -> String {
+        if let Some(planet) = self.ui.selectors.planets.last_selected() {
+            format!(
+                "{:?}",
+                self.planets_info.get_info(planet as u32).unwrap().supported_combination
+            )
+        } else {
+            "None".to_string()
+        }
+    }
+
 }
 
 // Selector methods for explorers
