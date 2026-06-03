@@ -10,7 +10,7 @@ use crate::ui::theme::{SpanThemeExt, Theme};
 
 /// Render global status bar (top panel).
 /// Shows game state, simulation clock, and sunray rate.
-pub fn render_globals_info(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
+pub(crate) fn render_globals_info(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
     let outer = Block::default()
         .borders(Borders::ALL)
         .border_style(theme.border());

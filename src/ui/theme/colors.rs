@@ -42,7 +42,7 @@ pub struct Palette {
 
 impl Palette {
     /// Default "Matrix" palette.
-    pub fn matrix() -> Self {
+    pub(crate) fn matrix() -> Self {
         Self {
             matrix_green: MATRIX_GREEN,
 

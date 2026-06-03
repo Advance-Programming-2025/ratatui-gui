@@ -14,7 +14,7 @@ use crate::game_state::GameState;
 
 /// UI render entrypoint.
 /// Selects active screen based on `GameState` and passes theme context down.
-pub fn render_ui(app: &mut App, frame: &mut Frame) {
+pub(crate) fn render_ui(app: &mut App, frame: &mut Frame) {
     let theme = theme::Theme::matrix();
     match app.get_game_state() {
         GameState::WaitingStart => {

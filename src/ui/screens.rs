@@ -11,7 +11,7 @@ use crate::ui::theme::{SpanThemeExt, Theme};
 
 /// Render start screen (pre-game).
 /// Shows intro text and generation mode selection.
-pub fn render_start_screen(app: &App, frame: &mut Frame, theme: &Theme) {
+pub(crate) fn render_start_screen(app: &App, frame: &mut Frame, theme: &Theme) {
     let area = frame.area();
 
     let chunks = Layout::default()

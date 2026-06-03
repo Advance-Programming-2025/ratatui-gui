@@ -2,7 +2,7 @@ use ratatui::layout::Constraint;
 
 /// Column constraints for explorers table.
 /// Keep widths centralized to avoid scattered magic numbers.
-pub fn explorers_columns() -> [Constraint; 4] {
+pub(crate) fn explorers_columns() -> [Constraint; 4] {
     [
         Constraint::Length(3),
         Constraint::Length(7),
@@ -13,7 +13,7 @@ pub fn explorers_columns() -> [Constraint; 4] {
 
 /// Column constraints for planets table.
 /// Keep widths centralized to make future renames and localization safer.
-pub fn planets_columns() -> [Constraint; 5] {
+pub(crate) fn planets_columns() -> [Constraint; 5] {
     [
         Constraint::Length(4),
         Constraint::Min(7),

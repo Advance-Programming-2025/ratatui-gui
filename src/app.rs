@@ -10,7 +10,7 @@ use omc_galaxy::settings;
 
 use crate::ui_state::AppUi;
 
-pub struct App {
+pub(crate) struct App {
     //State of the game
     pub(crate) gamestate: GameState,
     //Data about the game
@@ -39,7 +39,7 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(mut orchestrator: Orchestrator, log_buffer: Arc<LogBuffer>) -> Result<Self, String> {
+    pub(crate) fn new(mut orchestrator: Orchestrator, log_buffer: Arc<LogBuffer>) -> Result<Self, String> {
         Ok(Self {
             gamestate: GameState::WaitingStart,
             planets_info: orchestrator.get_planets_info(),
@@ -63,11 +63,11 @@ impl App {
 
     /// Synchronizes the local App state with the latest data from the Orchestrator.
     /// This acts as a thread-safe snapshot for the UI.
-    pub fn get_game_state(&self) -> GameState {
+    pub(crate) fn get_game_state(&self) -> GameState {
         self.gamestate.clone()
     }
 
-    pub fn set_game_state(&mut self, state: GameState) {
+    pub(crate) fn set_game_state(&mut self, state: GameState) {
         self.gamestate = state;
     }
     pub(crate) fn get_game_info(&mut self) -> Result<(), String> {
@@ -135,7 +135,7 @@ impl App {
 //Menù selector
 impl App {
     /// Cambia la modalità selezionata (0 per Random, 1 per Custom)
-    pub fn toggle_generation_mode(&mut self) {
+    pub(crate) fn toggle_generation_mode(&mut self) {
         if self.ui.start.selected_mode == 0 {
             self.ui.start.selected_mode = 1;
         } else {
@@ -145,7 +145,7 @@ impl App {
 
     /// Incrementa o decrementa il numero di pianeti per la modalità Custom
     /// Mantiene il valore in un range ragionevole (es. 1-50)
-    pub fn adjust_custom_planets(&mut self, delta: i32) {
+    pub(crate) fn adjust_custom_planets(&mut self, delta: i32) {
         let current = self.ui.start.custom_planet_count as i32;
         let new_value = (current + delta).clamp(1, 50);
         self.ui.start.custom_planet_count = new_value as u32;

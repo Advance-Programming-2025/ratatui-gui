@@ -4,7 +4,7 @@ use std::time::Duration;
 
 /// Represents the different states the game can be in
 #[derive(Clone, PartialEq, Debug)]
-pub enum GameState {
+pub(crate) enum GameState {
     /// Waiting for the player to start the game
     WaitingStart,
     /// Game is actively running
@@ -17,7 +17,7 @@ pub enum GameState {
 
 /// Global input handler that bridges TUI events with game logic.
 /// Reads one key event, dispatches to controller, then applies emitted commands.
-pub fn handle_game_state(app: &mut App) -> Result<(), String> {
+pub(crate) fn handle_game_state(app: &mut App) -> Result<(), String> {
     // Very short timeout for responsive input
     if event::poll(Duration::from_millis(5)).map_err(|_| "Polling error")? {
         if let Event::Key(key) = event::read().map_err(|_| "Reading events error")? {

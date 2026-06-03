@@ -10,7 +10,7 @@ use crate::{
 };
 
 /// Result of one controller step.
-pub struct Transition {
+pub(crate) struct Transition {
     pub commands: Vec<Command>,
 }
 
@@ -27,11 +27,11 @@ impl Transition {
 }
 
 /// UI controller owning input-to-state transitions.
-pub struct Controller;
+pub(crate) struct Controller;
 
 impl Controller {
     /// Handle one semantic action.
-    pub fn handle(&mut self, app: &mut App, action: Action) -> Transition {
+    pub(crate) fn handle(&mut self, app: &mut App, action: Action) -> Transition {
         if matches!(action, Action::None) {
             return Transition::none();
         }

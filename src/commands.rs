@@ -5,7 +5,7 @@ use crate::game_state::GameState;
 
 /// Side-effect requests emitted by controller.
 #[derive(Debug, Clone)]
-pub enum Command {
+pub(crate) enum Command {
     SetGameState(GameState),
     StartGame,
     StopAll,

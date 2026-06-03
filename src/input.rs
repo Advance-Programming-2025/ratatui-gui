@@ -5,7 +5,7 @@ use crossterm::event::{KeyCode, KeyEvent, KeyEventKind};
 
 /// Semantic input actions used by controller state machine.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Action {
+pub(crate) enum Action {
     Quit,
     Up,
     Down,
@@ -25,7 +25,7 @@ pub enum Action {
 
 /// Convert `KeyEvent` into an `Action`.
 /// Filters non-press events to reduce input noise.
-pub fn map_key(event: KeyEvent) -> Action {
+pub(crate) fn map_key(event: KeyEvent) -> Action {
     if event.kind != KeyEventKind::Press {
         return Action::None;
     }
