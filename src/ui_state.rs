@@ -63,7 +63,6 @@ impl Default for OverlayState {
 }
 
 /// UI state owned by app, separate from game model.
-#[derive(Debug, Clone)]
 pub struct AppUi {
     pub focus: Focus,
     pub mode: UiMode,

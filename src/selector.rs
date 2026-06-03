@@ -4,8 +4,7 @@
 use ratatui::widgets::{ListState, TableState};
 
 /// Generic row selector used by tables and lists.
-#[derive(Debug, Clone)]
-pub struct ListSelector {
+pub struct ListSelector{
     state: TableState,
     last_selected: Option<usize>,
 }
@@ -23,10 +22,16 @@ impl ListSelector {
     pub fn selected(&self) -> Option<usize> {
         self.state.selected()
     }
+    
 
     /// Last non-`None` selection seen.
     pub fn last_selected(&self) -> Option<usize> {
         self.last_selected
+    }
+
+    /// Set last selected planet for explorer update
+    pub(crate) fn set_last_selected(&mut self, explorer_planet:usize){
+        self.last_selected = Some(explorer_planet);
     }
 
     /// Last selection as `u32` for id usage.
@@ -64,17 +69,6 @@ impl ListSelector {
         }
 
         self.state.select(Some(0));
-        self.last_selected = self.state.selected().or(self.last_selected);
-    }
-
-    /// Select last row if list non-empty.
-    pub fn select_last(&mut self, len: usize) {
-        if len == 0 {
-            self.clear();
-            return;
-        }
-
-        self.state.select(Some(len - 1));
         self.last_selected = self.state.selected().or(self.last_selected);
     }
 
@@ -221,7 +215,6 @@ impl ResourceSelector {
 }
 
 /// All UI selectors owned by `AppUi`.
-#[derive(Debug, Clone)]
 pub struct Selectors {
     pub planets: ListSelector,
     pub explorers: ListSelector,
@@ -230,7 +223,7 @@ pub struct Selectors {
 
 impl Selectors {
     /// Create selectors for all lists.
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             planets: ListSelector::new(),
             explorers: ListSelector::new(),
