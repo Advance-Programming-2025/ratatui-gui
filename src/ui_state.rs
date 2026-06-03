@@ -20,6 +20,11 @@ pub enum UiMode {
         explorer_id: u32,
         return_focus: Focus,
     },
+    /// Modal "select resource" flow for the current explorer's planet.
+    GenerateResource {
+        explorer_id: u32,
+        return_focus: Focus,
+    },
 }
 
 /// Start screen UI state.

@@ -7,12 +7,12 @@ mod planets;
 use ratatui::{
     Frame,
     layout::{Constraint, Layout, Rect},
-    text::{Line, Span},
+    text::Line,
     widgets::{Block, Paragraph},
 };
 
 use crate::app::App;
-use crate::ui::theme::{BlockThemeExt, SpanThemeExt, Theme};
+use crate::ui::theme::{BlockThemeExt, Theme};
 
 /// Main entry point for the game screen UI.
 /// Organizes the screen into a top bar for globals and a main grid for tables and info.
@@ -66,7 +66,6 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame, theme: &Theme) {
         instructions::render_instructions(app, frame, other_area, theme);
     }
 }
-
 
 /// Helper for rendering the empty state of the info panel.
 fn render_extra_info_none(frame: &mut Frame, area: Rect, theme: &Theme) {

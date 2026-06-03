@@ -10,8 +10,17 @@ use crate::ui::theme::{SpanThemeExt, Theme};
 
 /// Render help panel with key bindings.
 pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
-    let text = vec![
-        Line::from(""),
+    let mut text = vec![Line::from("")];
+
+    if let Some(banner) = _app.ui.overlays.banner.as_ref() {
+        text.push(Line::from(vec![
+            Span::styled("  Notice: ", theme.warning().bold()),
+            Span::styled(banner.as_str(), theme.value().bold()),
+        ]));
+        text.push(Line::from(""));
+    }
+
+    text.extend([
         Line::from(vec![
             Span::raw("  Q ").danger(theme),
             Span::raw("- Quit").value(theme),
@@ -61,14 +70,18 @@ pub(crate) fn render_instructions(_app: &App, frame: &mut Frame, area: Rect, the
             Span::raw("- Move Explorer(select explorer first)").value(theme),
         ]),
         Line::from(vec![
+            Span::styled("  G ", theme.key()),
+            Span::raw("- Generate Resource(select explorer first)").value(theme),
+        ]),
+        Line::from(vec![
             Span::styled("  ENTER ", theme.key()),
-            Span::raw("- Confirm selection / move").value(theme),
+            Span::raw("- Confirm selection / move / resource").value(theme),
         ]),
         Line::from(vec![
             Span::styled("  ESC ", theme.key()),
-            Span::raw("- Abort move").value(theme),
+            Span::raw("- Abort move / resource").value(theme),
         ]),
-    ];
+    ]);
 
     let paragraph = Paragraph::new(text).block(
         Block::bordered()

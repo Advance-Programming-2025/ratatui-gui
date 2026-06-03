@@ -76,6 +76,7 @@ impl Controller {
         match &mut app.ui.mode {
             UiMode::Normal => self.handle_normal(app, action),
             UiMode::MoveExplorer { .. } => self.handle_move_explorer(app, action),
+            UiMode::GenerateResource { .. } => self.handle_generate_resource(app, action),
         }
     }
 
@@ -131,13 +132,35 @@ impl Controller {
                         .selectors
                         .planets
                         .restore_last(app.planets_info.len());
+                    app.ui.overlays.banner = Some(
+                        "Select a planet with ↑/↓, Enter to confirm, Esc to cancel.".to_string(),
+                    );
                     app.ui.mode = UiMode::MoveExplorer {
                         explorer_id,
                         return_focus,
                     };
                     return Transition::one(Command::StopExplorerAI { explorer_id });
                 } else {
-                    app.ui.overlays.banner = None;
+                    app.ui.overlays.banner = Some("Select explorer first.".to_string());
+                }
+                Transition::none()
+            }
+            Action::GenerateResource => {
+                if app.ui.focus != Focus::Explorers {
+                    return Transition::none();
+                }
+
+                if let Some(explorer_id) = app.ui.selectors.explorers.selected().map(|i| i as u32) {
+                    let return_focus = app.ui.focus;
+                    let available = app.available_resources_for_explorer(explorer_id);
+                    app.ui.selectors.resources.restore_last(available.len());
+                    app.ui.mode = UiMode::GenerateResource {
+                        explorer_id,
+                        return_focus,
+                    };
+                    return Transition::one(Command::StopExplorerAI { explorer_id });
+                } else {
+                    app.ui.overlays.banner = Some("Select explorer first.".to_string());
                 }
                 Transition::none()
             }
@@ -167,7 +190,8 @@ impl Controller {
                 Transition::none()
             }
             Action::Confirm => {
-                let Some(explorer_id) = current_move_explorer_id(&app.ui.mode) else {
+                let Some((explorer_id, return_focus)) = current_move_explorer_context(&app.ui.mode)
+                else {
                     app.ui.mode = UiMode::Normal;
                     app.ui.overlays.banner = None;
                     return Transition::none();
@@ -178,7 +202,7 @@ impl Controller {
                 };
                 let planet_id = planet_idx as u32;
                 app.ui.mode = UiMode::Normal;
-                app.ui.focus = Focus::Explorers;
+                app.ui.focus = return_focus;
                 app.ui.selectors.planets.clear();
                 app.ui.overlays.banner = None;
                 Transition {
@@ -188,10 +212,62 @@ impl Controller {
                     }],
                 }
             }
-            _ => {
+            _ => Transition::none(),
+        }
+    }
+
+    fn handle_generate_resource(&mut self, app: &mut App, action: Action) -> Transition {
+        match action {
+            Action::Up => {
+                if let Some(explorer_id) = current_generate_resource_explorer_id(&app.ui.mode) {
+                    let available = app.available_resources_for_explorer(explorer_id);
+                    app.ui.selectors.resources.move_up(available.len());
+                }
+                Transition::none()
+            }
+            Action::Down => {
+                if let Some(explorer_id) = current_generate_resource_explorer_id(&app.ui.mode) {
+                    let available = app.available_resources_for_explorer(explorer_id);
+                    app.ui.selectors.resources.move_down(available.len());
+                }
+                Transition::none()
+            }
+            Action::Cancel => {
+                let return_focus = match app.ui.mode {
+                    UiMode::GenerateResource { return_focus, .. } => return_focus,
+                    _ => Focus::Explorers,
+                };
+                app.ui.mode = UiMode::Normal;
+                app.ui.focus = return_focus;
+                app.ui.selectors.resources.clear();
                 app.ui.overlays.banner = None;
                 Transition::none()
             }
+            Action::Confirm => {
+                let Some((explorer_id, return_focus)) =
+                    current_generate_resource_context(&app.ui.mode)
+                else {
+                    app.ui.mode = UiMode::Normal;
+                    app.ui.overlays.banner = None;
+                    return Transition::none();
+                };
+                let available = app.available_resources_for_explorer(explorer_id);
+                let Some(resource_idx) = app.ui.selectors.resources.last_selected() else {
+                    app.ui.overlays.banner = Some("Select resource first.".to_string());
+                    return Transition::none();
+                };
+                let Some(_resource) = available.get(resource_idx).cloned() else {
+                    app.ui.overlays.banner = Some("Select resource first.".to_string());
+                    return Transition::none();
+                };
+
+                app.ui.mode = UiMode::Normal;
+                app.ui.focus = return_focus;
+                app.ui.selectors.resources.clear();
+                app.ui.overlays.banner = None;
+                Transition::none()
+            }
+            _ => Transition::none(),
         }
     }
 
@@ -229,9 +305,29 @@ impl Controller {
     }
 }
 
-fn current_move_explorer_id(mode: &UiMode) -> Option<u32> {
+fn current_generate_resource_explorer_id(mode: &UiMode) -> Option<u32> {
     match mode {
-        UiMode::MoveExplorer { explorer_id, .. } => Some(*explorer_id),
+        UiMode::GenerateResource { explorer_id, .. } => Some(*explorer_id),
+        _ => None,
+    }
+}
+
+fn current_move_explorer_context(mode: &UiMode) -> Option<(u32, Focus)> {
+    match mode {
+        UiMode::MoveExplorer {
+            explorer_id,
+            return_focus,
+        } => Some((*explorer_id, *return_focus)),
+        _ => None,
+    }
+}
+
+fn current_generate_resource_context(mode: &UiMode) -> Option<(u32, Focus)> {
+    match mode {
+        UiMode::GenerateResource {
+            explorer_id,
+            return_focus,
+        } => Some((*explorer_id, *return_focus)),
         _ => None,
     }
 }

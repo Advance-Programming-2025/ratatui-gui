@@ -1,16 +1,16 @@
 use ratatui::{
     Frame,
     layout::Rect,
-    widgets::{Block, Cell, Row, Table},
+    text::{Line, Span},
+    widgets::{Block, Cell, Paragraph, Row, Table},
 };
 
 use crate::app::App;
 use crate::ui::{
     layout,
-    theme::{BlockThemeExt, Theme},
+    theme::{BlockThemeExt, SpanThemeExt, Theme},
 };
 use crate::view_models;
-use super::*;
 
 /// Render explorers table (list view).
 pub(crate) fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect, theme: &Theme) {
@@ -66,4 +66,3 @@ pub(crate) fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rec
     ];
     frame.render_widget(Paragraph::new(details), inner_area);
 }
-

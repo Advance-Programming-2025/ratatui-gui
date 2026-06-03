@@ -35,7 +35,7 @@ Key idea: **Controller emits Commands**, game loop executes them. Render only re
 UI behavior is driven by nested state:
 
 - `GameState` (screen/phase): `WaitingStart | Running | Paused | Ended`
-- `UiMode` (interaction mode): `Normal | MoveExplorer{...}`
+- `UiMode` (interaction mode): `Normal | MoveExplorer{...} | GenerateResource{...}`
 - `Focus` (routing for arrows in normal mode): `Planets | Explorers`
 
 This prevents “giant match” growth by making each level responsible for one concern.
@@ -53,8 +53,11 @@ stateDiagram-v2
   state "UiMode (inside Running/Paused)" as UM {
     [*] --> Normal
     Normal --> MoveExplorer: m (explorer selected)
+    Normal --> GenerateResource: g (explorer selected)
     MoveExplorer --> Normal: Esc (abort)
     MoveExplorer --> Normal: Enter (confirm)
+    GenerateResource --> Normal: Esc (abort)
+    GenerateResource --> Normal: Enter (confirm)
   }
 ```
 
@@ -79,7 +82,7 @@ File: `src/ui_state.rs`
 `AppUi` owns UI-only state:
 
 - `focus: Focus` (which list gets navigation)
-- `mode: UiMode` (modal flows like MoveExplorer)
+- `mode: UiMode` (modal flows like MoveExplorer / GenerateResource)
 - `selectors: Selectors` (cursor state for tables)
 - `start: StartScreenState` (start menu)
 - `overlays: OverlayState` (log toggle + banner string)
@@ -96,7 +99,7 @@ File: `src/selector.rs`
 - supports `move_up/move_down`, `clear`
 - supports `restore_last` for focus switching behavior
 
-`Selectors` groups per-list selectors (`planets`, `explorers`).
+`Selectors` groups per-list selectors (`planets`, `explorers`, `resources`).
 
 Rule: selectors do not know anything about “planet” or “explorer”.
 
@@ -172,3 +175,10 @@ To add a new interaction (ex: “send explorer to planet” with extra confirmat
 
 Keeps nesting stable: `GameState -> UiMode -> Focus`.
 
+### Resource selection flow
+
+- `G` opens a selectable resource list when an explorer is selected.
+- The list uses the reusable selector state, so `↑` / `↓` move through resources.
+- `Enter` confirms the current resource and closes the modal.
+- `Esc` cancels and returns to the previous focus.
+- Supported resources in the planet detail panel now render as a readable list instead of a joined debug string.

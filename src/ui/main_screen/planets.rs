@@ -1,9 +1,19 @@
 use ratatui::{
-    Frame, layout::Rect, text::{Line, Span}, widgets::{Block, Cell, List, Paragraph, Row, Table}
+    Frame,
+    layout::{Constraint, Layout, Rect},
+    text::{Line, Span},
+    widgets::{Block, Cell, List, ListItem, Paragraph, Row, Table},
 };
 
-use crate::{app::App, ui::{layout, theme::{BlockThemeExt, SpanThemeExt}}, ui_state::UiMode, view_models};
-use super::*;
+use crate::{
+    app::App,
+    ui::{
+        layout,
+        theme::{BlockThemeExt, SpanThemeExt, Theme},
+    },
+    ui_state::UiMode,
+    view_models,
+};
 
 /// Render planets table (list view).
 /// Row styling uses view model flags (neighbor highlight) instead of inline logic.
@@ -32,7 +42,7 @@ pub(crate) fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect,
                         theme.danger()
                     }
                 }
-                UiMode::Normal => {
+                UiMode::Normal | UiMode::GenerateResource { .. } => {
                     if row.highlight_neighbor {
                         theme.value()
                     } else {
@@ -65,9 +75,22 @@ pub(crate) fn render_planets_table(app: &mut App, frame: &mut Frame, area: Rect,
 }
 
 /// Renders planet details when a planet is selected in the table.
-pub(crate) fn render_extra_info_planet(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
-    //format the values for supported resource and supported combination
-    let mut text = vec![
+pub(crate) fn render_extra_info_planet(
+    app: &mut App,
+    frame: &mut Frame,
+    area: Rect,
+    theme: &Theme,
+) {
+    let outer = Block::bordered()
+        .title(" Extra Info - Planet ")
+        .panel(theme);
+    let inner_area = outer.inner(area);
+    frame.render_widget(outer, area);
+
+    let [details_area, resources_area] =
+        Layout::vertical([Constraint::Length(6), Constraint::Min(3)]).areas(inner_area);
+
+    let text = vec![
         Line::from(""),
         Line::from(vec![
             Span::raw("  Name: ").muted(theme),
@@ -88,26 +111,39 @@ pub(crate) fn render_extra_info_planet(app: &App, frame: &mut Frame, area: Rect,
                 theme.value(),
             ),
         ]),
-        Line::from(vec![
-            Span::raw("  Supported Resource: ").muted(theme),
-            Span::styled(
-                format!("{}", app.get_supported_resource()),
-                theme.value(),
-            ),
-        ]),
-        Line::from(vec![
-            Span::raw("  Supported Combination: ").muted(theme),
-            Span::styled(
-                format!("{}", app.get_supported_combination()),
-                theme.value(),
-            ),
-        ])
     ];
 
-    let paragraph = Paragraph::new(text).block(
-        Block::bordered()
-            .title(" Extra Info - Planet ")
-            .panel(theme),
-    );
-    frame.render_widget(paragraph, area);
+    frame.render_widget(Paragraph::new(text), details_area);
+
+    let resources = app.available_resources_for_selected_planet();
+    let items: Vec<ListItem> = if resources.is_empty() {
+        vec![ListItem::new(Line::from(vec![Span::styled(
+            "  No supported resources",
+            theme.value(),
+        )]))]
+    } else {
+        resources
+            .into_iter()
+            .map(|resource| {
+                ListItem::new(Line::from(vec![
+                    Span::styled(resource, theme.value()),
+                ]))
+            })
+            .collect()
+    };
+
+    let list = List::new(items)
+        .block(
+            Block::bordered()
+                .title(" Supported Resources ")
+                .panel(theme),
+        )
+        .highlight_style(theme.row_highlight())
+        .highlight_symbol("");
+
+    if matches!(app.ui.mode, UiMode::GenerateResource { .. }) {
+        frame.render_stateful_widget(list, resources_area, app.ui.selectors.resources.state_mut());
+    } else {
+        frame.render_widget(list, resources_area);
+    }
 }
