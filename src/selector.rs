@@ -124,11 +124,6 @@ impl ResourceSelector {
         }
     }
 
-    /// Current selected row index.
-    pub fn selected(&self) -> Option<usize> {
-        self.state.selected()
-    }
-
     /// Last non-`None` selection seen.
     pub fn last_selected(&self) -> Option<usize> {
         self.last_selected
@@ -164,17 +159,6 @@ impl ResourceSelector {
         }
 
         self.state.select(Some(0));
-        self.last_selected = self.state.selected().or(self.last_selected);
-    }
-
-    /// Select last row if list non-empty.
-    pub fn select_last(&mut self, len: usize) {
-        if len == 0 {
-            self.clear();
-            return;
-        }
-
-        self.state.select(Some(len - 1));
         self.last_selected = self.state.selected().or(self.last_selected);
     }
 

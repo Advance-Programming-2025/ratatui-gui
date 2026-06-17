@@ -123,13 +123,6 @@ impl App {
         self.get_game_info_without_explorers()?;
         Ok(())
     }
-
-    pub(crate) fn set_sunray_increment(&mut self) {
-        settings::set_sunray_probability(self.sunray_rate + 5);
-    }
-    pub(crate) fn set_sunray_decrement(&mut self) {
-        settings::set_sunray_probability(self.sunray_rate - 5);
-    }
 }
 
 //Menù selector
