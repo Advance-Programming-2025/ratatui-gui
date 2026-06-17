@@ -152,7 +152,7 @@ impl Controller {
 
                 if let Some(explorer_id) = app.ui.selectors.explorers.selected().map(|i| i as u32) {
                     let return_focus = app.ui.focus;
-                    let available = app.available_resources_for_explorer(explorer_id);
+                    let available = app.get_supported_resource(explorer_id);
                     app.ui.selectors.resources.restore_last(available.len());
                     app.ui.mode = UiMode::GenerateResource {
                         explorer_id,
@@ -220,14 +220,14 @@ impl Controller {
         match action {
             Action::Up => {
                 if let Some(explorer_id) = current_generate_resource_explorer_id(&app.ui.mode) {
-                    let available = app.available_resources_for_explorer(explorer_id);
+                    let available = app.get_supported_resource(explorer_id);
                     app.ui.selectors.resources.move_up(available.len());
                 }
                 Transition::none()
             }
             Action::Down => {
                 if let Some(explorer_id) = current_generate_resource_explorer_id(&app.ui.mode) {
-                    let available = app.available_resources_for_explorer(explorer_id);
+                    let available = app.get_supported_resource(explorer_id);
                     app.ui.selectors.resources.move_down(available.len());
                 }
                 Transition::none()
@@ -251,7 +251,7 @@ impl Controller {
                     app.ui.overlays.banner = None;
                     return Transition::none();
                 };
-                let available = app.available_resources_for_explorer(explorer_id);
+                let available = app.get_supported_resource(explorer_id);
                 let Some(resource_idx) = app.ui.selectors.resources.last_selected() else {
                     app.ui.overlays.banner = Some("Select resource first.".to_string());
                     return Transition::none();

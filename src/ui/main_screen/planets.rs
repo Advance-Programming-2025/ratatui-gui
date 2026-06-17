@@ -7,6 +7,7 @@ use ratatui::{
 
 use crate::{
     app::App,
+    print_trait::Printable,
     ui::{
         layout,
         theme::{BlockThemeExt, SpanThemeExt, Theme},
@@ -114,7 +115,8 @@ pub(crate) fn render_extra_info_planet(
 
     frame.render_widget(Paragraph::new(text), details_area);
 
-    let resources = app.available_resources_for_selected_planet();
+    let planet_id = app.get_selected_planet().unwrap() as u32;
+    let resources = app.get_supported_resource(planet_id);
     let items: Vec<ListItem> = if resources.is_empty() {
         vec![ListItem::new(Line::from(vec![Span::styled(
             "  No supported resources",
@@ -123,16 +125,17 @@ pub(crate) fn render_extra_info_planet(
     } else {
         resources
             .into_iter()
-            .map(|resource| ListItem::new(Line::from(vec![Span::styled(resource, theme.value())])))
+            .map(|resource| {
+                ListItem::new(Line::from(vec![Span::styled(
+                    resource.to_print(),
+                    theme.value(),
+                )]))
+            })
             .collect()
     };
 
     let list = List::new(items)
-        .block(
-            Block::bordered()
-                .title(" Supported Resources ")
-                .panel(theme),
-        )
+        .block(Block::bordered().title(" Basic Resources ").panel(theme))
         .highlight_style(theme.row_highlight())
         .highlight_symbol("");
 

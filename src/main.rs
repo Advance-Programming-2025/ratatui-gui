@@ -4,6 +4,7 @@ mod controller;
 mod game_state;
 mod input;
 mod loops;
+mod print_trait;
 mod selector;
 mod tui_loggers;
 mod ui;

@@ -1,3 +1,4 @@
+use common_game::components::resource::BasicResourceType;
 use omc_galaxy::{Orchestrator, PlanetInfoMap, utils::ExplorerInfoMap};
 use std::{
     collections::VecDeque,
@@ -180,6 +181,9 @@ impl App {
             None => "None".to_string(),
         }
     }
+    pub(crate) fn get_selected_planet(&self) -> Option<usize> {
+        self.ui.selectors.planets.last_selected()
+    }
     pub(crate) fn get_name_selected_planet(&self) -> String {
         if let Some(planet) = self.ui.selectors.planets.last_selected() {
             format!(
@@ -190,29 +194,22 @@ impl App {
             "None".to_string()
         }
     }
-    pub(crate) fn get_supported_resource(&self) -> Vec<String> {
-        match self.ui.selectors.planets.last_selected() {
-            Some(planet) => self.supported_resources_for_planet(planet as u32),
-            None => vec![],
+    pub(crate) fn get_supported_resource(&self, planet_id: u32) -> Vec<BasicResourceType> {
+        let mut supported_resource_list: Vec<BasicResourceType> = Vec::new();
+        if let Some(planet) = self.planets_info.get_info(planet_id) {
+            if let Some(resources) = planet.supported_resources.clone() {
+                for resource in resources {
+                    supported_resource_list.push(resource);
+                }
+            }
         }
+        supported_resource_list
     }
     pub(crate) fn get_supported_combination(&self) -> Vec<String> {
         match self.ui.selectors.planets.last_selected() {
             Some(planet) => self.supported_combination_for_planet(planet as u32),
             None => vec![],
         }
-    }
-
-    pub(crate) fn supported_resources_for_planet(&self, planet_id: u32) -> Vec<String> {
-        let Some(planet) = self.planets_info.get_info(planet_id) else {
-            return vec![];
-        };
-
-        planet
-            .supported_resources
-            .iter()
-            .map(|resource| format!("{:?}", resource).trim_matches('"').to_string())
-            .collect()
     }
 
     pub(crate) fn supported_combination_for_planet(&self, planet_id: u32) -> Vec<String> {
@@ -225,42 +222,6 @@ impl App {
             .iter()
             .map(|resource| format!("{:?}", resource).trim_matches('"').to_string())
             .collect()
-    }
-
-    pub(crate) fn available_resources_for_planet(&self, planet_id: u32) -> Vec<String> {
-        let mut resources = Vec::new();
-        for label in self.supported_resources_for_planet(planet_id) {
-            if !resources.contains(&label) {
-                resources.push(label);
-            }
-        }
-
-        for label in self.supported_combination_for_planet(planet_id) {
-            if !resources.contains(&label) {
-                resources.push(label);
-            }
-        }
-
-        resources
-    }
-
-    pub(crate) fn available_resources_for_selected_planet(&self) -> Vec<String> {
-        match self.ui.selectors.planets.last_selected() {
-            Some(planet) => self.available_resources_for_planet(planet as u32),
-            None => vec![],
-        }
-    }
-
-    pub(crate) fn available_resources_for_explorer(&self, explorer_id: u32) -> Vec<String> {
-        let Some(planet_id) = self.explorers_info.get_planet(&explorer_id) else {
-            return vec![];
-        };
-
-        let Ok(planet_id) = planet_id.to_string().parse::<u32>() else {
-            return vec![];
-        };
-
-        self.available_resources_for_planet(planet_id)
     }
 }
 
