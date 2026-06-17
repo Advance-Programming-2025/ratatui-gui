@@ -196,7 +196,7 @@ impl Controller {
                     app.ui.overlays.banner = None;
                     return Transition::none();
                 };
-                let Some(planet_idx) = app.ui.selectors.planets.last_selected() else {
+                let Some(planet_idx) = app.ui.selectors.planets.selected() else {
                     app.ui.overlays.banner = Some("Select planet first.".to_string());
                     return Transition::none();
                 };

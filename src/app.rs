@@ -39,7 +39,10 @@ pub(crate) struct App {
 }
 
 impl App {
-    pub(crate) fn new(mut orchestrator: Orchestrator, log_buffer: Arc<LogBuffer>) -> Result<Self, String> {
+    pub(crate) fn new(
+        mut orchestrator: Orchestrator,
+        log_buffer: Arc<LogBuffer>,
+    ) -> Result<Self, String> {
         Ok(Self {
             gamestate: GameState::WaitingStart,
             planets_info: orchestrator.get_planets_info(),

@@ -4,7 +4,7 @@
 use ratatui::widgets::{ListState, TableState};
 
 /// Generic row selector used by tables and lists.
-pub struct ListSelector{
+pub struct ListSelector {
     state: TableState,
     last_selected: Option<usize>,
 }
@@ -22,7 +22,6 @@ impl ListSelector {
     pub fn selected(&self) -> Option<usize> {
         self.state.selected()
     }
-    
 
     /// Last non-`None` selection seen.
     pub fn last_selected(&self) -> Option<usize> {
@@ -30,7 +29,7 @@ impl ListSelector {
     }
 
     /// Set last selected planet for explorer update
-    pub(crate) fn set_last_selected(&mut self, explorer_planet:usize){
+    pub(crate) fn set_last_selected(&mut self, explorer_planet: usize) {
         self.last_selected = Some(explorer_planet);
     }
 
