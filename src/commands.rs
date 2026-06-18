@@ -1,7 +1,7 @@
 //! Side-effect commands emitted by UI controller.
 //! Executed by game loop against orchestrator and model.
 
-use common_game::components::resource::{ResourceType};
+use common_game::components::resource::ResourceType;
 
 use crate::game_state::GameState;
 
@@ -32,4 +32,6 @@ pub(crate) enum Command {
         explorer_id: u32,
         resource: ResourceType,
     },
+    DecreaseRatio,
+    IncreaseRatio,
 }

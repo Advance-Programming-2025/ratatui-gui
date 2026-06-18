@@ -1,4 +1,3 @@
-use crossterm::style::style;
 use ratatui::{
     Frame,
     layout::{Alignment, Constraint, Layout, Rect},
@@ -27,10 +26,7 @@ pub(crate) fn render_globals_info(app: &App, frame: &mut Frame, area: Rect, them
 
     let state_line = Line::from(vec![
         Span::raw("Game ").default(theme),
-        Span::styled(
-            format!("{:?}", app.gamestate),
-            theme.default(),
-        ),
+        Span::styled(format!("{:?}", app.gamestate), theme.default().bold()),
     ]);
     let state = Paragraph::new(state_line).alignment(Alignment::Center);
     frame.render_widget(state, state_area);
@@ -43,8 +39,11 @@ pub(crate) fn render_globals_info(app: &App, frame: &mut Frame, area: Rect, them
     frame.render_widget(time, time_area);
 
     let sunray_line = Line::from(vec![
-        Span::raw("Sunray ").default(theme),
-        Span::styled(format!("{}%", app.sunray_rate), theme.default().bold()),
+        Span::raw("Sunray/Asteroid ").default(theme),
+        Span::styled(
+            format!("{}%", app.sunray_asteroid_ratio),
+            theme.default().bold(),
+        ),
     ]);
     let sunray = Paragraph::new(sunray_line).alignment(Alignment::Center);
     frame.render_widget(sunray, sunray_area);

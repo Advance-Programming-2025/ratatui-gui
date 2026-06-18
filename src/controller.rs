@@ -74,6 +74,12 @@ impl Controller {
         if matches!(action, Action::TogglePause) {
             return self.handle_toggle_pause(app);
         }
+        if matches!(action, Action::IncreaseRatio) {
+            return Transition::one(Command::IncreaseRatio);
+        }
+        if matches!(action, Action::DecreaseRatio) {
+            return Transition::one(Command::DecreaseRatio);
+        }
 
         match &mut app.ui.mode {
             UiMode::Normal => self.handle_normal(app, action),

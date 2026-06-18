@@ -167,13 +167,13 @@ fn render_generation_menu(app: &App, frame: &mut Frame, area: Rect, theme: &Them
 fn render_footer(frame: &mut Frame, area: Rect, theme: &Theme) {
     let info = Line::from(vec![
         Span::styled(" UP/DOWN ", theme.key()),
-        Span::raw("Navigate | ").value(theme),
+        Span::raw("Navigate | ").default(theme),
         Span::styled(" LEFT/RIGHT ", theme.key()),
-        Span::raw("Increase/Decrease | ").value(theme),
-        Span::styled(" ENTER ", theme.success().add_modifier(Modifier::BOLD)),
-        Span::raw("Confirm & Start | ").value(theme),
+        Span::raw("Increase/Decrease | ").default(theme),
+        Span::styled(" ENTER ", theme.default().add_modifier(Modifier::BOLD)),
+        Span::raw("Confirm & Start | ").default(theme),
         Span::styled(" Q ", theme.danger()),
-        Span::raw("Quit").value(theme),
+        Span::raw("Quit").default(theme),
     ]);
     frame.render_widget(Paragraph::new(info).alignment(Alignment::Center), area);
 }

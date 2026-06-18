@@ -13,7 +13,7 @@ pub trait SpanThemeExt<'a> {
     /// Apply main value style.
     fn value(self, theme: &Theme) -> Span<'a>;
 
-    fn default(self, theme:&Theme)->Span<'a>;
+    fn default(self, theme: &Theme) -> Span<'a>;
 }
 
 impl<'a> SpanThemeExt<'a> for Span<'a> {
@@ -33,7 +33,7 @@ impl<'a> SpanThemeExt<'a> for Span<'a> {
         Self::styled(self.content, theme.value())
     }
 
-    fn default(self, theme:&Theme)->Span<'a> {
+    fn default(self, theme: &Theme) -> Span<'a> {
         Self::styled(self.content, theme.default())
     }
 }

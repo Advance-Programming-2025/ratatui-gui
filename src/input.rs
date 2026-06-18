@@ -19,7 +19,8 @@ pub(crate) enum Action {
     GenerateResource,
     SendAsteroid,
     SendSunray,
-    Digit(u8),
+    IncreaseRatio,
+    DecreaseRatio,
     None,
 }
 
@@ -44,7 +45,8 @@ pub(crate) fn map_key(event: KeyEvent) -> Action {
         KeyCode::Char('g') => Action::GenerateResource,
         KeyCode::Char('a') => Action::SendAsteroid,
         KeyCode::Char('s') => Action::SendSunray,
-        KeyCode::Char(c) if c.is_ascii_digit() => Action::Digit(c as u8 - b'0'),
+        KeyCode::Char('i') => Action::IncreaseRatio,
+        KeyCode::Char('k') => Action::DecreaseRatio,
         _ => Action::None,
     }
 }

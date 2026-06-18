@@ -7,7 +7,6 @@ use std::{
 };
 
 use crate::{game_state::GameState, tui_loggers::LogBuffer};
-use omc_galaxy::settings;
 
 use crate::ui_state::AppUi;
 
@@ -17,7 +16,7 @@ pub(crate) struct App {
     //Data about the game
     pub(crate) planets_info: PlanetInfoMap, //Planet Info
     pub(crate) explorers_info: ExplorerInfoMap,
-    pub(crate) sunray_rate: u32,
+    pub(crate) sunray_asteroid_ratio: u32,
     pub(crate) galaxy_topology: Vec<Vec<bool>>, // Esempio: ID pianeta -> Vicini
     pub(crate) incoming_sunray_asteroids_queue: VecDeque<(u32, bool)>,
     pub(crate) orchestrator: Orchestrator,
@@ -51,7 +50,7 @@ impl App {
             galaxy_topology: orchestrator.get_galaxy_topology(),
             incoming_sunray_asteroids_queue: VecDeque::new(),
             orchestrator,
-            sunray_rate: settings::get_sunray_probability(),
+            sunray_asteroid_ratio: 100,
 
             exit: false,
             last_tick: Instant::now(),
@@ -77,13 +76,11 @@ impl App {
     pub(crate) fn get_game_info(&mut self) -> Result<(), String> {
         self.planets_info = self.orchestrator.get_planets_info();
         self.explorers_info = self.orchestrator.get_explorer_states();
-        self.sunray_rate = settings::get_sunray_probability();
         self.galaxy_topology = self.orchestrator.get_galaxy_topology();
         Ok(())
     }
     pub(crate) fn get_game_info_without_explorers(&mut self) -> Result<(), String> {
         self.planets_info = self.orchestrator.get_planets_info();
-        self.sunray_rate = settings::get_sunray_probability();
         self.galaxy_topology = self.orchestrator.get_galaxy_topology();
         Ok(())
     }
@@ -240,16 +237,18 @@ impl App {
     }
 }
 
-// Methods for handling both explorer and planet
-impl App {}
-
 // Handler sunray asteroid send
 impl App {
     pub(crate) fn add_incoming_sunray_asteroid(&mut self) -> Result<(), String> {
+        //select one random planet
         let planet_id = self.orchestrator.get_random_planet_id()?;
-        let is_sunray = settings::does_sunray_spawn();
-        self.incoming_sunray_asteroids_queue
-            .push_back((planet_id, is_sunray));
+        //select sunray or asteroid based on the sunray/asteroid ratio
+        let random_value = rand::random::<u32>() % 100;
+        if random_value <= self.sunray_asteroid_ratio as u32 {
+            self.add_incoming_sunray_for_planet(planet_id);
+        } else {
+            self.add_incoming_asteroid_for_planet(planet_id);
+        }
 
         Ok(())
     }
@@ -281,7 +280,7 @@ pub(crate) fn bag_to_string(bag: &[common_game::components::resource::ResourceTy
     use std::collections::HashMap;
 
     // Display order — defines both sort and symbol
-    const RESOURCE_ORDER: &[&str] = &["AP", "R", "Do", "L", "W", "O", "S", "H", "D", "C"];
+    const RESOURCE_ORDER: &[&str] = &["AP", "R", "Do", "L", "W", "D", "S", "O", "C", "H"];
 
     let mut counts: HashMap<&str, u32> = RESOURCE_ORDER.iter().map(|k| (*k, 0)).collect();
 

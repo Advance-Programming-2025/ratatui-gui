@@ -94,6 +94,16 @@ fn apply_command(app: &mut App, command: Command) -> Result<(), String> {
                     .send_combine_resource_request(explorer_id, complex)?;
             }
         },
+        Command::IncreaseRatio => {
+            if app.sunray_asteroid_ratio < 100 {
+                app.sunray_asteroid_ratio = app.sunray_asteroid_ratio + 1;
+            }
+        }
+        Command::DecreaseRatio => {
+            if app.sunray_asteroid_ratio > 0 {
+                app.sunray_asteroid_ratio = app.sunray_asteroid_ratio - 1;
+            }
+        }
     }
 
     Ok(())
