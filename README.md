@@ -1,184 +1,49 @@
-# ratatui-gui
+# One Million Crabs - The Game
 
-Terminal UI for galaxy simulation (explorers + planets).
+> *Welcome Commander. You are tasked to lead the crab-driven expansion across the galaxy. Do you have what it takes?*
 
-## Architecture overview
+## Overview
 
-Goal: keep UI predictable and refactor-friendly by separating:
+Welcome to One Million Crabs (OMC)'s galaxy terminal visualizer! This repo houses the front-end of the 2025/26 Advanced 
+Programming course project, built with RataTui. Explorers try to navigate the galaxy autonomously (or manually, if you 
+think you can do better than our AI!) to avoid asteroids and generate as many resources as possible to generate even
+more things. Who will survive the longest? Who will create the most resources? Who will make the most AI partners? 
+Take it for a spin and find out!
 
-- **Model**: game data + orchestrator integration
-- **Controller**: input-driven state machine + command emission
-- **View**: ratatui rendering (no business logic)
+## Run the project
 
-This replaces earlier approach where:
+The project is built in Rust and as such it can be run with Cargo. simply:
 
-- one giant key handler mixed navigation, phase changes, and orchestrator calls
-- selection logic for multiple lists lived inside ad-hoc selector state
-- UI render paths had to know too much about selection mechanics
-
-## Data flow (one-frame)
-
-```mermaid
-flowchart LR
-  A["crossterm KeyEvent"] --> B["input::map_key -> Action"]
-  B --> C["controller::Controller.handle(App, Action)"]
-  C --> D["Transition{ commands }"]
-  D --> E["game_state::apply_command(App, Command)"]
-  E --> F["orchestrator / model updates"]
-  F --> G["ui::render_ui(App, Frame)"]
+1. Clone the project
+```bash
+git clone https://github.com/Advance-Programming-2025/ratatui-gui.git
+```
+2. Build and run
+```bash
+cargo run
 ```
 
-Key idea: **Controller emits Commands**, game loop executes them. Render only reads state.
 
-## Nested UI state machine
+## Architecture
+The architecture is modular and state‑driven, with a clear separation between the game engine (orchestrator), the application state (App), the controller (input‑to‑command mapping), and the view (rendering). This makes the codebase maintainable and extensible.
 
-UI behavior is driven by nested state:
+### Game Engine
+The orchestrator intermediates the communication between the actors of the game (planet and explorer) and the UI with a dedicated layer of APIs. But you can find more details here.
 
-- `GameState` (screen/phase): `WaitingStart | Running | Paused | Ended`
-- `UiMode` (interaction mode): `Normal | MoveExplorer{...} | GenerateResource{...}`
-- `Focus` (routing for arrows in normal mode): `Planets | Explorers`
+### Application State
+The App struct reflects what the state of the game is, by taking frequent snapshots of the orchestrator and making the information available to be shown on the terminal.
 
-This prevents “giant match” growth by making each level responsible for one concern.
+### Controller
+The controller translates raw key events into semantic actions and decides which commands to emit based on the current game state, UI mode, and focus. It is stateless and returns a list of side‑effect commands that are then applied to the App and the orchestrator.
 
-```mermaid
-stateDiagram-v2
-  state "GameState" as GS {
-    [*] --> WaitingStart
-    WaitingStart --> Running: StartGame
-    Running --> Paused: TogglePause
-    Paused --> Running: TogglePause
-    Running --> Ended: NoPlanetsAlive
-  }
+### View
+The view is built with ratatui and organised into screens (start, game, paused, ended). It uses a centralised theme and reusable selectors to manage list/table highlights. Rendering is split across dedicated modules (planets, explorers, logs, instructions) and leverages view models to keep presentation logic separate from raw data.
 
-  state "UiMode (inside Running/Paused)" as UM {
-    [*] --> Normal
-    Normal --> MoveExplorer: m (explorer selected)
-    Normal --> GenerateResource: g (explorer selected)
-    MoveExplorer --> Normal: Esc (abort)
-    MoveExplorer --> Normal: Enter (confirm)
-    GenerateResource --> Normal: Esc (abort)
-    GenerateResource --> Normal: Enter (confirm)
-  }
-```
+### Advanced rust features
+- Generic functions to reduce code duplication for shared logic (e.g., ResourceSelector<T>).
 
-## Modules (what does what)
+- Use of Arc and Mutex for safe sharing of the log buffer between threads.
 
-### Model (App)
+---
 
-File: `src/app.rs`
-
-`App` owns:
-
-- Orchestrator + latest snapshots (`planets_info`, `explorers_info`, `galaxy_topology`)
-- Timers + queues for scheduled events
-- UI state container `ui: AppUi`
-
-Rule: **no direct key parsing inside `App`**.
-
-### UI state (nested state)
-
-File: `src/ui_state.rs`
-
-`AppUi` owns UI-only state:
-
-- `focus: Focus` (which list gets navigation)
-- `mode: UiMode` (modal flows like MoveExplorer / GenerateResource)
-- `selectors: Selectors` (cursor state for tables)
-- `start: StartScreenState` (start menu)
-- `overlays: OverlayState` (log toggle + banner string)
-
-Rule: UI state contains no orchestrator calls.
-
-### Selectors (reusable cursor utilities)
-
-File: `src/selector.rs`
-
-`ListSelector` is a small reusable cursor:
-
-- stores `TableState` for ratatui stateful widgets
-- supports `move_up/move_down`, `clear`
-- supports `restore_last` for focus switching behavior
-
-`Selectors` groups per-list selectors (`planets`, `explorers`, `resources`).
-
-Rule: selectors do not know anything about “planet” or “explorer”.
-
-### Input mapping (noise filter)
-
-File: `src/input.rs`
-
-`map_key(KeyEvent) -> Action`:
-
-- filters non-press events
-- maps raw keys into semantic `Action` values
-
-Rule: controller works only with `Action`, not `KeyCode`.
-
-### Controller (state machine)
-
-File: `src/controller.rs`
-
-`Controller::handle(app, action)`:
-
-- dispatches by `GameState`, then `UiMode`, then `Focus`
-- mutates `app.ui` (selectors, focus, mode, banner)
-- returns `Transition { commands }`
-
-Rule: controller does not call orchestrator directly.
-
-### Commands (side effects)
-
-File: `src/commands.rs`
-
-`Command` represents “things to do” outside pure UI state:
-
-- start/stop/restart
-- toggle log overlay
-- queue asteroid/sunray
-- move explorer
-- set game phase
-
-### Command execution (bridge)
-
-File: `src/game_state.rs`
-
-`handle_game_state(app)`:
-
-- reads one key event
-- maps to `Action`
-- runs controller
-- applies emitted commands via `apply_command`
-
-Rule: `apply_command` is where orchestrator gets called.
-
-### View (render)
-
-Files:
-
-- `src/ui/mod.rs` entrypoint + theme creation
-- `src/ui/main_screen/*` main in-game layout
-- `src/ui/screens.rs` start screen
-- `src/view_models.rs` pre-format view rows (keeps render dumb)
-- `src/ui/theme/*` palette + intent styles + helpers
-
-Rule: render code should not implement business decisions, only layout + styling.
-
-## Extending behavior (example: new modal flow)
-
-To add a new interaction (ex: “send explorer to planet” with extra confirmation):
-
-1. Add a new `UiMode` variant in `src/ui_state.rs`
-2. Add a handler in `src/controller.rs` for that mode
-3. Emit a `Command` in `src/commands.rs`
-4. Execute command in `apply_command` in `src/game_state.rs`
-5. Render banner/prompt in UI (read from `app.ui.overlays.banner`)
-
-Keeps nesting stable: `GameState -> UiMode -> Focus`.
-
-### Resource selection flow
-
-- `G` opens a selectable resource list when an explorer is selected.
-- The list uses the reusable selector state, so `↑` / `↓` move through resources.
-- `Enter` confirms the current resource and closes the modal.
-- `Esc` cancels and returns to the previous focus.
-- Supported resources in the planet detail panel now render as a readable list instead of a joined debug string.
+Built by Marco Adami for the 2025/26 Advanced Programming course @ UniTN

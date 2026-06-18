@@ -92,7 +92,7 @@ fn render_title(frame: &mut Frame, area: Rect, theme: &Theme) {
 
 /// Render mission briefing text panel.
 fn render_intro_text(frame: &mut Frame, area: Rect, theme: &Theme) {
-    let intro = "\nWelcome Commander. You are tasked to simulate the crab-driven mission across the galaxy. \
+    let intro = "\nWelcome Commander. You are tasked to lead the crab-driven expansion across the galaxy. Do you have what it takes? \
                   Manage explorers, collect rare resources, and understand how the galaxy works. 
                   ";
 
