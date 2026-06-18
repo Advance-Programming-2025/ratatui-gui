@@ -16,7 +16,7 @@ pub trait SpanThemeExt<'a> {
 
 impl<'a> SpanThemeExt<'a> for Span<'a> {
     fn muted(self, theme: &Theme) -> Span<'a> {
-        Self::styled(self.content, theme.muted())
+        Self::styled(self.content, theme.matrix_green())
     }
 
     fn accent(self, theme: &Theme) -> Span<'a> {

@@ -40,7 +40,7 @@ impl Default for StartScreenState {
     fn default() -> Self {
         Self {
             selected_mode: 0,
-            custom_planet_count: 0,
+            custom_planet_count: 9,
         }
     }
 }
