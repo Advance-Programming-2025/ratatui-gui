@@ -7,7 +7,7 @@ use ratatui::{
 
 use crate::{
     app::App,
-    print_trait::Printable,
+    trait_list::Printable,
     ui::{
         layout,
         theme::{BlockThemeExt, SpanThemeExt, Theme},
@@ -90,6 +90,10 @@ pub(crate) fn render_extra_info_planet(
     let [details_area, resources_area] =
         Layout::vertical([Constraint::Length(6), Constraint::Min(3)]).areas(inner_area);
 
+    let [basic_area, complex_area] =
+        Layout::horizontal([Constraint::Fill(1), Constraint::Fill(1)]).areas(resources_area);
+
+    // Define the details extra info
     let text = vec![
         Line::from(""),
         Line::from(vec![
@@ -115,19 +119,21 @@ pub(crate) fn render_extra_info_planet(
 
     frame.render_widget(Paragraph::new(text), details_area);
 
+    // Define the basic list widget
     let planet_id = app.get_selected_planet().unwrap() as u32;
-    let resources = app.get_supported_resource(planet_id);
-    let items: Vec<ListItem> = if resources.is_empty() {
+    let basic_resources = app.get_supported_resource(planet_id);
+    let items: Vec<ListItem> = if basic_resources.is_empty() {
         vec![ListItem::new(Line::from(vec![Span::styled(
             "  No supported resources",
             theme.value(),
         )]))]
     } else {
-        resources
+        basic_resources
+            .clone()
             .into_iter()
-            .map(|resource| {
+            .map(|basic| {
                 ListItem::new(Line::from(vec![Span::styled(
-                    resource.to_print(),
+                    basic.to_print(),
                     theme.value(),
                 )]))
             })
@@ -139,9 +145,42 @@ pub(crate) fn render_extra_info_planet(
         .highlight_style(theme.row_highlight())
         .highlight_symbol("");
 
-    if matches!(app.ui.mode, UiMode::GenerateResource { .. }) {
-        frame.render_stateful_widget(list, resources_area, app.ui.selectors.resources.state_mut());
+
+    frame.render_stateful_widget(
+        list,
+        basic_area,
+        app.ui.selectors.basic_resources.state_mut(),
+    );
+
+    // Define complex resource widget
+    let planet_id = app.get_selected_planet().unwrap() as u32;
+    let complex_resources = app.get_supported_combination(planet_id);
+    let items: Vec<ListItem> = if complex_resources.is_empty() {
+        vec![ListItem::new(Line::from(vec![Span::styled(
+            "  None",
+            theme.value(),
+        )]))]
     } else {
-        frame.render_widget(list, resources_area);
-    }
+        complex_resources
+            .clone()
+            .into_iter()
+            .map(|complex| {
+                ListItem::new(Line::from(vec![Span::styled(
+                    complex.to_print(),
+                    theme.value(),
+                )]))
+            })
+            .collect()
+    };
+
+    let list = List::new(items)
+        .block(Block::bordered().title(" Basic Resources ").panel(theme))
+        .highlight_style(theme.row_highlight())
+        .highlight_symbol("");
+
+    frame.render_stateful_widget(
+        list,
+        complex_area,
+        app.ui.selectors.complex_resource.state_mut(),
+    );
 }

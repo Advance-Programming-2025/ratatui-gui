@@ -1,4 +1,4 @@
-use common_game::components::resource::BasicResourceType;
+use common_game::components::resource::{BasicResourceType, ComplexResourceType};
 use omc_galaxy::{Orchestrator, PlanetInfoMap, utils::ExplorerInfoMap};
 use std::{
     collections::VecDeque,
@@ -205,23 +205,16 @@ impl App {
         }
         supported_resource_list
     }
-    pub(crate) fn get_supported_combination(&self) -> Vec<String> {
-        match self.ui.selectors.planets.last_selected() {
-            Some(planet) => self.supported_combination_for_planet(planet as u32),
-            None => vec![],
+    pub(crate) fn get_supported_combination(&self, planet_id: u32) -> Vec<ComplexResourceType> {
+        let mut supported_resource_list: Vec<ComplexResourceType> = Vec::new();
+        if let Some(planet) = self.planets_info.get_info(planet_id) {
+            if let Some(resources) = planet.supported_combination.clone() {
+                for resource in resources {
+                    supported_resource_list.push(resource);
+                }
+            }
         }
-    }
-
-    pub(crate) fn supported_combination_for_planet(&self, planet_id: u32) -> Vec<String> {
-        let Some(planet) = self.planets_info.get_info(planet_id) else {
-            return vec![];
-        };
-
-        planet
-            .supported_combination
-            .iter()
-            .map(|resource| format!("{:?}", resource).trim_matches('"').to_string())
-            .collect()
+        supported_resource_list
     }
 }
 

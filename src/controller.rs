@@ -1,6 +1,8 @@
 //! UI controller state machine.
 //! Dispatches actions using nested (phase, mode, focus) state.
 
+use common_game::components::resource::ResourceType::{Basic, Complex};
+
 use crate::{
     app::App,
     commands::Command,
@@ -149,11 +151,41 @@ impl Controller {
                 if app.ui.focus != Focus::Explorers {
                     return Transition::none();
                 }
+                app.ui.selectors.basic_resources.clear();
+                app.ui.selectors.complex_resource.clear();
 
                 if let Some(explorer_id) = app.ui.selectors.explorers.selected().map(|i| i as u32) {
+                    // 1. Recupera il pianeta corrente su cui si trova questo specifico Explorer
+                    let planet_id = match app.explorers_info.get(&explorer_id) {
+                        Some(explorer) => explorer.current_planet_id,
+                        None => {
+                            app.ui.overlays.banner = Some("Impossibile determinare la posizione dell'explorer.".to_string());
+                            return Transition::none();
+                        }
+                    };
+
                     let return_focus = app.ui.focus;
-                    let available = app.get_supported_resource(explorer_id);
-                    app.ui.selectors.resources.restore_last(available.len());
+                    
+                    // 2. Passa il PLANET_ID (e non l'explorer_id) al metodo!
+                    let available_basic = app.get_supported_resource(planet_id);
+                    let available_complex = app.get_supported_combination(planet_id); // Se usi questo per le complesse
+
+                    // 3. Inizializza le liste originali dei selettori con i dati reali del pianeta
+                    app.ui
+                        .selectors
+                        .basic_resources
+                        .set_original_list(available_basic.clone());
+                    app.ui
+                        .selectors
+                        .complex_resource
+                        .set_original_list(available_complex.clone());
+
+                    // 4. Ripristina gli indici visivi della selezione interna
+                    app.ui
+                        .selectors
+                        .basic_resources
+                        .restore_last(available_basic.len());
+
                     app.ui.mode = UiMode::GenerateResource {
                         explorer_id,
                         return_focus,
@@ -219,17 +251,17 @@ impl Controller {
     fn handle_generate_resource(&mut self, app: &mut App, action: Action) -> Transition {
         match action {
             Action::Up => {
-                if let Some(explorer_id) = current_generate_resource_explorer_id(&app.ui.mode) {
-                    let available = app.get_supported_resource(explorer_id);
-                    app.ui.selectors.resources.move_up(available.len());
-                }
+                app.ui
+                    .selectors
+                    .basic_resources
+                    .move_up(app.ui.selectors.basic_resources.len());
                 Transition::none()
             }
             Action::Down => {
-                if let Some(explorer_id) = current_generate_resource_explorer_id(&app.ui.mode) {
-                    let available = app.get_supported_resource(explorer_id);
-                    app.ui.selectors.resources.move_down(available.len());
-                }
+                app.ui
+                    .selectors
+                    .basic_resources
+                    .move_down(app.ui.selectors.basic_resources.len());
                 Transition::none()
             }
             Action::Cancel => {
@@ -239,11 +271,12 @@ impl Controller {
                 };
                 app.ui.mode = UiMode::Normal;
                 app.ui.focus = return_focus;
-                app.ui.selectors.resources.clear();
+                app.ui.selectors.basic_resources.clear();
                 app.ui.overlays.banner = None;
                 Transition::none()
             }
             Action::Confirm => {
+                // 1. Recupera l'explorer_id CORRETTO dallo stato della modalità UI attuale
                 let Some((explorer_id, return_focus)) =
                     current_generate_resource_context(&app.ui.mode)
                 else {
@@ -251,21 +284,49 @@ impl Controller {
                     app.ui.overlays.banner = None;
                     return Transition::none();
                 };
-                let available = app.get_supported_resource(explorer_id);
-                let Some(resource_idx) = app.ui.selectors.resources.last_selected() else {
-                    app.ui.overlays.banner = Some("Select resource first.".to_string());
-                    return Transition::none();
-                };
-                let Some(_resource) = available.get(resource_idx).cloned() else {
-                    app.ui.overlays.banner = Some("Select resource first.".to_string());
-                    return Transition::none();
+
+                // 2. Controlla quale widget ha una selezione ATTIVA (usando selected(), non last_selected())
+                let basic_idx = app.ui.selectors.basic_resources.state_mut().selected();
+                let complex_idx = app.ui.selectors.complex_resource.state_mut().selected();
+
+                // 3. Determina la risorsa basandoti su cosa è effettivamente evidenziato a schermo
+                let resource = match (basic_idx, complex_idx) {
+                    (Some(index), _) => {
+                        // Se c'è una selezione sulla lista basic, diamo la priorità o gestiamo questa
+                        let basic = app
+                            .ui
+                            .selectors
+                            .basic_resources
+                            .get_element_from_original_list(index);
+                        Basic(basic)
+                    }
+                    (None, Some(index)) => {
+                        let complex = app
+                            .ui
+                            .selectors
+                            .complex_resource
+                            .get_element_from_original_list(index);
+                        Complex(complex)
+                    }
+                    (None, None) => {
+                        app.ui.overlays.banner =
+                            Some("Seleziona una risorsa prima di confermare!".to_string());
+                        return Transition::none();
+                    }
                 };
 
+                // 4. Ripristina lo stato normale della UI
                 app.ui.mode = UiMode::Normal;
                 app.ui.focus = return_focus;
-                app.ui.selectors.resources.clear();
+                app.ui.selectors.basic_resources.clear();
+                app.ui.selectors.complex_resource.clear();
                 app.ui.overlays.banner = None;
-                Transition::none()
+
+                // 5. Invia il comando con l'explorer_id garantito
+                Transition::one(Command::GenerateResource {
+                    explorer_id,
+                    resource,
+                })
             }
             _ => Transition::none(),
         }

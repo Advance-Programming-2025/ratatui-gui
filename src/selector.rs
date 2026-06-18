@@ -1,7 +1,10 @@
 //! Reusable selection cursors for stateful widgets.
 //! Provides minimal row navigation without embedding domain logic.
 
+use common_game::components::resource::{BasicResourceType, ComplexResourceType};
 use ratatui::widgets::{ListState, TableState};
+
+use crate::app::App;
 
 /// Generic row selector used by tables and lists.
 pub struct ListSelector {
@@ -109,18 +112,24 @@ impl ListSelector {
 
 /// Generic row selector used by list widgets.
 #[derive(Debug, Clone)]
-pub struct ResourceSelector {
+pub struct ResourceSelector<T> {
     state: ListState,
     last_selected: Option<usize>,
+    original_list: Vec<T>,
 }
 
-impl ResourceSelector {
+impl<T: Clone> ResourceSelector<T> {
     /// Create empty selector with no selection.
     pub fn new() -> Self {
         Self {
             state: ListState::default(),
             last_selected: None,
+            original_list: vec![],
         }
+    }
+
+    pub(crate) fn len(&self) -> usize {
+        self.original_list.len()
     }
 
     /// Last non-`None` selection seen.
@@ -195,13 +204,20 @@ impl ResourceSelector {
     pub fn state_mut(&mut self) -> &mut ListState {
         &mut self.state
     }
+    pub(crate) fn set_original_list(&mut self, new_list: Vec<T>) {
+        self.original_list = new_list;
+    }
+    pub(crate) fn get_element_from_original_list(&mut self, index: usize) -> T {
+        self.original_list[index].clone()
+    }
 }
 
 /// All UI selectors owned by `AppUi`.
 pub struct Selectors {
     pub planets: ListSelector,
     pub explorers: ListSelector,
-    pub resources: ResourceSelector,
+    pub basic_resources: ResourceSelector<BasicResourceType>,
+    pub complex_resource: ResourceSelector<ComplexResourceType>,
 }
 
 impl Selectors {
@@ -210,7 +226,8 @@ impl Selectors {
         Self {
             planets: ListSelector::new(),
             explorers: ListSelector::new(),
-            resources: ResourceSelector::new(),
+            basic_resources: ResourceSelector::new(),
+            complex_resource: ResourceSelector::new(),
         }
     }
 }

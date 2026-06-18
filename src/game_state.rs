@@ -1,4 +1,5 @@
 use crate::{app::App, commands::Command, controller::Controller, input, ui_state::UiMode};
+use common_game::components::resource::ResourceType::{self, Basic, Complex};
 use crossterm::event::{self, Event};
 use std::time::Duration;
 
@@ -80,6 +81,19 @@ fn apply_command(app: &mut App, command: Command) -> Result<(), String> {
                 .send_move_explorer_from_gui(explorer_id, planet_id)?;
             app.ui.mode = UiMode::Normal;
         }
+        Command::GenerateResource {
+            explorer_id,
+            resource,
+        } => match resource {
+            Basic(basic) => {
+                app.orchestrator
+                    .send_generate_resource_request(explorer_id, basic)?;
+            }
+            Complex(complex) => {
+                app.orchestrator
+                    .send_combine_resource_request(explorer_id, complex)?;
+            }
+        },
     }
 
     Ok(())
