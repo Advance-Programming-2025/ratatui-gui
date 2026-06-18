@@ -70,15 +70,15 @@ pub(crate) fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rec
     let mut details = vec![
         Line::from(""),
         Line::from(vec![
-            Span::raw("  ID Explorer: ").muted(theme),
+            Span::raw("  ID Explorer: ").default(theme),
             Span::styled(format!("{}", explorer_id), theme.value().bold()),
         ]),
         Line::from(vec![
-            Span::raw("  Current Planet: ").muted(theme),
+            Span::raw("  Current Planet: ").default(theme),
             Span::styled(app.get_planet_selected_explorer(), theme.value()),
         ]),
         Line::from(""),
-        Line::from(vec![Span::raw("  Bag Content:").muted(theme)]),
+        Line::from(vec![Span::raw("  Bag Content:").default(theme)]),
     ];
 
     // 3. Recuperiamo il vettore reale di ResourceType dell'explorer selezionato dalla mappa del gioco
@@ -91,7 +91,7 @@ pub(crate) fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rec
         details.append(&mut bag_lines);
     } else {
         details.push(Line::from(vec![
-            Span::raw("    ").muted(theme),
+            Span::raw("    ").default(theme),
             Span::styled("No explorer selected or data missing", theme.value().red()),
         ]));
     }
@@ -106,7 +106,7 @@ pub(crate) fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rec
 fn get_formatted_bag_contents<'a>(bag: &'a [ResourceType], theme: &'a Theme) -> Vec<Line<'a>> {
     if bag.is_empty() {
         return vec![Line::from(vec![
-            Span::raw("    ").muted(theme),
+            Span::raw("    ").default(theme),
             Span::styled("Empty", theme.value().italic()),
         ])];
     }
@@ -132,8 +132,8 @@ fn get_formatted_bag_contents<'a>(bag: &'a [ResourceType], theme: &'a Theme) -> 
         if let Some(&count) = counts.get(resource_name) {
             if count > 0 {
                 lines.push(Line::from(vec![
-                    Span::raw("    ").muted(theme), // Rientranza elenco
-                    Span::raw(format!("{}: ", resource_name)).muted(theme),
+                    Span::raw("    ").default(theme), // Rientranza elenco
+                    Span::raw(format!("{}: ", resource_name)).default(theme),
                     Span::styled(format!("{}", count), theme.value().bold()),
                 ]));
             }
@@ -145,8 +145,8 @@ fn get_formatted_bag_contents<'a>(bag: &'a [ResourceType], theme: &'a Theme) -> 
     for (resource_name, count) in counts {
         if !RESOURCE_ORDER.contains(&resource_name.as_str()) && count > 0 {
             lines.push(Line::from(vec![
-                Span::raw("    ").muted(theme),
-                Span::raw(format!("{}: ", resource_name)).muted(theme),
+                Span::raw("    ").default(theme),
+                Span::raw(format!("{}: ", resource_name)).default(theme),
                 Span::styled(format!("{}", count), theme.value().bold()),
             ]));
         }

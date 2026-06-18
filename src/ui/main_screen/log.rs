@@ -1,6 +1,5 @@
 use crate::app::App;
 use crate::ui::theme::{SpanThemeExt, Theme};
-use log::Level;
 use ratatui::{
     Frame,
     layout::Rect,
@@ -16,13 +15,7 @@ pub(crate) fn render_log_overlay(app: &App, frame: &mut Frame, area: Rect, theme
     let mut lines: Vec<Line> = logs_lock
         .iter()
         .map(|(level, msg)| {
-            let level_style = match *level {
-                Level::Error => theme.danger(),
-                Level::Warn => theme.warning().bold(),
-                Level::Info => theme.success().bold(),
-                Level::Debug => theme.accent().bold(),
-                Level::Trace => theme.default(),
-            };
+            let level_style = theme.default();
 
             Line::from(vec![
                 Span::styled(format!("{:<5} ", level), level_style),
@@ -34,9 +27,9 @@ pub(crate) fn render_log_overlay(app: &App, frame: &mut Frame, area: Rect, theme
     // Aggiungi istruzioni in fondo
     lines.push(Line::from(""));
     lines.push(Line::from(vec![
-        Span::raw("Press ").muted(theme),
+        Span::raw("Press ").default(theme),
         Span::styled("L", theme.success().bold()),
-        Span::raw(" to close").muted(theme),
+        Span::raw(" to close").default(theme),
     ]));
 
     let log_overlay = Paragraph::new(lines)

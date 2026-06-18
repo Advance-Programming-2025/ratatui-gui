@@ -3,8 +3,6 @@ mod ext;
 
 use ratatui::style::{Modifier, Style};
 
-use crate::game_state::GameState;
-
 pub use colors::Palette;
 pub use ext::{BlockThemeExt, SpanThemeExt};
 
@@ -93,19 +91,5 @@ impl Theme {
         Style::default()
             .bg(self.palette.bg_highlight)
             .fg(self.palette.matrix_green)
-    }
-
-    /// Style mapping for game state indicator in global header.
-    pub fn game_state_style(&self, state: GameState) -> Style {
-        match state {
-            GameState::Running => self.danger(),
-            GameState::Paused => self.warning().add_modifier(Modifier::BOLD),
-            GameState::Ended => Style::default()
-                .fg(self.palette.matrix_green)
-                .add_modifier(Modifier::BOLD),
-            GameState::WaitingStart => Style::default()
-                .fg(self.palette.matrix_green)
-                .add_modifier(Modifier::BOLD),
-        }
     }
 }

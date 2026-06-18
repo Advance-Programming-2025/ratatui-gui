@@ -51,14 +51,6 @@ impl Palette {
             // fg_accent: Color::Cyan,
             fg_warning: Color::Yellow,
             fg_danger: Color::Red,
-            // fg_success: Color::Green,
-            // fg_info: Color::Blue,
-            // fg_info_dim: Color::LightCyan,
-            // fg_key: Color::Magenta,
-            // fg_nav: Color::Cyan,
-
-            // border: Color::DarkGray,
-            // border_active: Color::LightRed,
             bg_highlight: Color::DarkGray,
         }
     }

@@ -97,19 +97,19 @@ pub(crate) fn render_extra_info_planet(
     let text = vec![
         Line::from(""),
         Line::from(vec![
-            Span::raw("  Name: ").muted(theme),
+            Span::raw("  Name: ").default(theme),
             Span::styled(app.get_name_selected_planet(), theme.value().bold()),
         ]),
         Line::from(vec![
-            Span::raw("  ID: ").muted(theme),
+            Span::raw("  ID: ").default(theme),
             Span::styled(app.get_id_selected_planet(), theme.value()),
         ]),
         Line::from(vec![
-            Span::raw("  Cells: ").muted(theme),
+            Span::raw("  Cells: ").default(theme),
             Span::styled(app.get_cells_info_selected_planet(), theme.value()),
         ]),
         Line::from(vec![
-            Span::raw("  Rocket: ").muted(theme),
+            Span::raw("  Rocket: ").default(theme),
             Span::styled(
                 format!("{}", app.get_rocket_of_selected_planet()),
                 theme.value(),

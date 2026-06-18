@@ -172,7 +172,7 @@ fn render_footer(frame: &mut Frame, area: Rect, theme: &Theme) {
         Span::raw("Increase/Decrease | ").default(theme),
         Span::styled(" ENTER ", theme.default().add_modifier(Modifier::BOLD)),
         Span::raw("Confirm & Start | ").default(theme),
-        Span::styled(" Q ", theme.danger()),
+        Span::styled(" Q ", theme.default()),
         Span::raw("Quit").default(theme),
     ]);
     frame.render_widget(Paragraph::new(info).alignment(Alignment::Center), area);

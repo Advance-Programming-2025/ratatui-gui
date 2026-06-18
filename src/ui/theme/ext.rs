@@ -5,33 +5,11 @@ use super::Theme;
 /// Span helpers for applying theme intent styles with minimal boilerplate.
 pub trait SpanThemeExt<'a> {
     /// Apply muted label style.
-    fn muted(self, theme: &Theme) -> Span<'a>;
-    /// Apply accent style.
-    fn accent(self, theme: &Theme) -> Span<'a>;
-    /// Apply danger style.
-    fn danger(self, theme: &Theme) -> Span<'a>;
-    /// Apply main value style.
-    fn value(self, theme: &Theme) -> Span<'a>;
 
     fn default(self, theme: &Theme) -> Span<'a>;
 }
 
 impl<'a> SpanThemeExt<'a> for Span<'a> {
-    fn muted(self, theme: &Theme) -> Span<'a> {
-        Self::styled(self.content, theme.default())
-    }
-
-    fn accent(self, theme: &Theme) -> Span<'a> {
-        Self::styled(self.content, theme.accent())
-    }
-
-    fn danger(self, theme: &Theme) -> Span<'a> {
-        Self::styled(self.content, theme.danger())
-    }
-
-    fn value(self, theme: &Theme) -> Span<'a> {
-        Self::styled(self.content, theme.value())
-    }
 
     fn default(self, theme: &Theme) -> Span<'a> {
         Self::styled(self.content, theme.default())
