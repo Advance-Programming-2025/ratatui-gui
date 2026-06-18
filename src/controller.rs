@@ -159,13 +159,15 @@ impl Controller {
                     let planet_id = match app.explorers_info.get(&explorer_id) {
                         Some(explorer) => explorer.current_planet_id,
                         None => {
-                            app.ui.overlays.banner = Some("Impossibile determinare la posizione dell'explorer.".to_string());
+                            app.ui.overlays.banner = Some(
+                                "Impossibile determinare la posizione dell'explorer.".to_string(),
+                            );
                             return Transition::none();
                         }
                     };
 
                     let return_focus = app.ui.focus;
-                    
+
                     // 2. Passa il PLANET_ID (e non l'explorer_id) al metodo!
                     let available_basic = app.get_supported_resource(planet_id);
                     let available_complex = app.get_supported_combination(planet_id); // Se usi questo per le complesse
@@ -181,10 +183,7 @@ impl Controller {
                         .set_original_list(available_complex.clone());
 
                     // 4. Ripristina gli indici visivi della selezione interna
-                    app.ui
-                        .selectors
-                        .basic_resources
-                        .restore_last(available_basic.len());
+                    app.ui.selectors.basic_resources.restore_last();
 
                     app.ui.mode = UiMode::GenerateResource {
                         explorer_id,
@@ -210,6 +209,7 @@ impl Controller {
                 app.ui.selectors.planets.move_down(app.planets_info.len());
                 Transition::none()
             }
+
             Action::Cancel => {
                 let return_focus = match app.ui.mode {
                     UiMode::MoveExplorer { return_focus, .. } => return_focus,
@@ -251,17 +251,19 @@ impl Controller {
     fn handle_generate_resource(&mut self, app: &mut App, action: Action) -> Transition {
         match action {
             Action::Up => {
-                app.ui
-                    .selectors
-                    .basic_resources
-                    .move_up(app.ui.selectors.basic_resources.len());
+                app.ui.selectors.list_resource_move_up();
                 Transition::none()
             }
             Action::Down => {
-                app.ui
-                    .selectors
-                    .basic_resources
-                    .move_down(app.ui.selectors.basic_resources.len());
+                app.ui.selectors.list_resource_move_down();
+                Transition::none()
+            }
+            Action::Right => {
+                app.ui.selectors.list_resource_move_right();
+                Transition::none()
+            }
+            Action::Left => {
+                app.ui.selectors.list_resource_move_left();
                 Transition::none()
             }
             Action::Cancel => {

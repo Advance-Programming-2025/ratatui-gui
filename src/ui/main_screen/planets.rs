@@ -145,7 +145,6 @@ pub(crate) fn render_extra_info_planet(
         .highlight_style(theme.row_highlight())
         .highlight_symbol("");
 
-
     frame.render_stateful_widget(
         list,
         basic_area,
@@ -174,7 +173,7 @@ pub(crate) fn render_extra_info_planet(
     };
 
     let list = List::new(items)
-        .block(Block::bordered().title(" Basic Resources ").panel(theme))
+        .block(Block::bordered().title(" Complex Resources ").panel(theme))
         .highlight_style(theme.row_highlight())
         .highlight_symbol("");
 

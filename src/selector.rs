@@ -12,6 +12,11 @@ pub struct ListSelector {
     last_selected: Option<usize>,
 }
 
+enum ListFocus {
+    BasicList,
+    ComplexList,
+}
+
 impl ListSelector {
     /// Create empty selector with no selection.
     pub fn new() -> Self {
@@ -143,7 +148,8 @@ impl<T: Clone> ResourceSelector<T> {
     }
 
     /// Restore last selection if valid, otherwise select first row.
-    pub fn restore_last(&mut self, len: usize) {
+    pub fn restore_last(&mut self) {
+        let len = self.original_list.len();
         if len == 0 {
             self.clear();
             return;
@@ -171,7 +177,8 @@ impl<T: Clone> ResourceSelector<T> {
     }
 
     /// Move selection up within bounds.
-    pub fn move_up(&mut self, len: usize) {
+    pub fn move_up(&mut self) {
+        let len = self.original_list.len();
         if len == 0 {
             self.clear();
             return;
@@ -186,7 +193,8 @@ impl<T: Clone> ResourceSelector<T> {
     }
 
     /// Move selection down within bounds.
-    pub fn move_down(&mut self, len: usize) {
+    pub fn move_down(&mut self) {
+        let len = self.original_list.len();
         if len == 0 {
             self.clear();
             return;
@@ -218,6 +226,7 @@ pub struct Selectors {
     pub explorers: ListSelector,
     pub basic_resources: ResourceSelector<BasicResourceType>,
     pub complex_resource: ResourceSelector<ComplexResourceType>,
+    pub list_focus: ListFocus,
 }
 
 impl Selectors {
@@ -228,6 +237,37 @@ impl Selectors {
             explorers: ListSelector::new(),
             basic_resources: ResourceSelector::new(),
             complex_resource: ResourceSelector::new(),
+            list_focus: ListFocus::BasicList,
         }
+    }
+
+    pub(crate) fn list_resource_move_up(&mut self) {
+        match self.list_focus {
+            ListFocus::BasicList => {
+                self.basic_resources.move_up();
+            }
+            ListFocus::ComplexList => self.complex_resource.move_up(),
+        }
+    }
+
+    pub(crate) fn list_resource_move_down(&mut self) {
+        match self.list_focus {
+            ListFocus::BasicList => {
+                self.basic_resources.move_down();
+            }
+            ListFocus::ComplexList => self.complex_resource.move_down(),
+        }
+    }
+    pub(crate) fn list_resource_move_right(&mut self) {
+        if self.complex_resource.len() != 0 {
+            self.basic_resources.clear();
+            self.complex_resource.restore_last();
+            self.list_focus = ListFocus::ComplexList;
+        }
+    }
+    pub(crate) fn list_resource_move_left(&mut self) {
+        self.complex_resource.clear();
+        self.basic_resources.restore_last();
+        self.list_focus = ListFocus::BasicList;
     }
 }
