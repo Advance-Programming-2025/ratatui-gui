@@ -5,7 +5,7 @@ use common_game::components::resource::ResourceType::{Basic, Complex};
 
 use crate::{
     app::App,
-    commands::{Command},
+    commands::Command,
     game_state::GameState,
     input::Action,
     ui_state::{Focus, UiMode},

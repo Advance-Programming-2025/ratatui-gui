@@ -1,4 +1,4 @@
-use crate::{app::App, commands::{Command}, controller::Controller, input, ui_state::UiMode};
+use crate::{app::App, commands::Command, controller::Controller, input, ui_state::UiMode};
 use common_game::components::resource::ResourceType::{Basic, Complex};
 use crossterm::event::{self, Event};
 use std::time::Duration;
@@ -39,12 +39,12 @@ fn apply_command(app: &mut App, command: Command) -> Result<(), String> {
             app.set_game_state(state);
         }
         Command::StartGame => {
-            if app.ui.start.selected_mode==0{
+            if app.ui.start.selected_mode == 0 {
                 app.initialize_by_file()?;
-            }else{
+            } else {
                 app.initialize_by_random_planet()?;
             }
-            
+
             let mattia_explorers = vec![(0, 0)];
             let tommy_explorers = vec![(1, 1)];
             app.orchestrator
