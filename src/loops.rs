@@ -65,11 +65,8 @@ impl App {
                 //Invia o sunray o asteroid in base alla code definita in App
                 loop {
                     match self.pop_incoming_sunray_asteroid() {
-                        Some((planet_id, true)) => {
-                            self.orchestrator.send_sunray_from_gui(vec![planet_id])?;
-                        }
-                        Some((planet_id, false)) => {
-                            self.orchestrator.send_asteroid_from_gui(vec![planet_id])?;
+                        Some((planet_id, is_sunray)) => {
+                            self.orchestrator.send_celestial_from_gui(vec![planet_id], is_sunray)?;
                         }
                         None => break,
                     }
