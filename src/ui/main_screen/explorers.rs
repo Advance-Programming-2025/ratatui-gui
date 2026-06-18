@@ -1,3 +1,6 @@
+use std::collections::{BTreeMap, HashMap};
+
+use common_game::components::resource::ResourceType;
 use ratatui::{
     Frame,
     layout::Rect,
@@ -5,12 +8,12 @@ use ratatui::{
     widgets::{Block, Cell, Paragraph, Row, Table},
 };
 
-use crate::app::App;
 use crate::ui::{
     layout,
     theme::{BlockThemeExt, SpanThemeExt, Theme},
 };
 use crate::view_models;
+use crate::{app::App, trait_list::Printable};
 
 /// Render explorers table (list view).
 pub(crate) fn render_explorers(app: &mut App, frame: &mut Frame, area: Rect, theme: &Theme) {
@@ -60,23 +63,94 @@ pub(crate) fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rec
     let inner_area = block.inner(area);
     frame.render_widget(block, area);
 
-    let details = vec![
+    // 1. Recuperiamo l'ID corrente dell'explorer selezionato
+    let explorer_id = app.get_id_selected_explorer();
+
+    // 2. Prepariamo i dettagli base dell'interfaccia
+    let mut details = vec![
         Line::from(""),
         Line::from(vec![
             Span::raw("  ID Explorer: ").muted(theme),
-            Span::styled(
-                format!("{}", app.get_id_selected_explorer()),
-                theme.value().bold(),
-            ),
+            Span::styled(format!("{}", explorer_id), theme.value().bold()),
         ]),
         Line::from(vec![
             Span::raw("  Current Planet: ").muted(theme),
             Span::styled(app.get_planet_selected_explorer(), theme.value()),
         ]),
-        Line::from(vec![
-            Span::raw("  Bag: ").muted(theme),
-            Span::styled(app.get_bag_selected_explorer(), theme.value()),
-        ]),
+        Line::from(""),
+        Line::from(vec![Span::raw("  Bag Content:").muted(theme)]),
     ];
-    frame.render_widget(Paragraph::new(details), inner_area);
+
+    // 3. Recuperiamo il vettore reale di ResourceType dell'explorer selezionato dalla mappa del gioco
+    if let Some(explorer_data) = app
+        .explorers_info
+        .get(&(app.ui.selectors.explorers.last_selected().unwrap() as u32))
+    {
+        // Otteniamo le linee formattate ("Hydrogen: 1", ecc.) e le appendiamo a details
+        let mut bag_lines = get_formatted_bag_contents(&explorer_data.bag, theme);
+        details.append(&mut bag_lines);
+    } else {
+        details.push(Line::from(vec![
+            Span::raw("    ").muted(theme),
+            Span::styled("No explorer selected or data missing", theme.value().red()),
+        ]));
+    }
+
+    // 4. Disegniamo l'intero blocco di testo nel pannello
+    let paragraph = Paragraph::new(details).style(theme.value());
+    frame.render_widget(paragraph, inner_area);
+}
+
+/// Prende la lista di risorse dell'explorer e restituisce un vettore di Line
+/// ordinate secondo un ordine specifico prefissato.
+fn get_formatted_bag_contents<'a>(bag: &'a [ResourceType], theme: &'a Theme) -> Vec<Line<'a>> {
+    if bag.is_empty() {
+        return vec![Line::from(vec![
+            Span::raw("    ").muted(theme),
+            Span::styled("Empty", theme.value().italic()),
+        ])];
+    }
+
+    // 1. Definiamo l'ordine esatto richiesto (basato sui nomi restituiti da to_print())
+    // Nota: "AI" corrisponde a ComplexResourceType::AIPartner nel tuo trait_list.rs
+    const RESOURCE_ORDER: &[&str] = &[
+        "AI", "Robot", "Dolphin", "Life", "Water", "Diamond", "Silicon", "Oxygen", "Carbon",
+        "Hydrogen",
+    ];
+
+    // 2. Raccogliamo i conteggi delle risorse presenti nella borsa dentro una HashMap
+    let mut counts = HashMap::new();
+    for resource in bag {
+        let name = resource.to_print();
+        *counts.entry(name).or_insert(0) += 1;
+    }
+
+    // 3. Generiamo le righe di testo seguendo RIGIDAMENTE l'ordine dell'array
+    let mut lines = Vec::new();
+    for &resource_name in RESOURCE_ORDER {
+        // Se l'explorer ha almeno 1 unità di questa risorsa, creiamo la riga
+        if let Some(&count) = counts.get(resource_name) {
+            if count > 0 {
+                lines.push(Line::from(vec![
+                    Span::raw("    ").muted(theme), // Rientranza elenco
+                    Span::raw(format!("{}: ", resource_name)).muted(theme),
+                    Span::styled(format!("{}", count), theme.value().bold()),
+                ]));
+            }
+        }
+    }
+
+    // Gestione di sicurezza: se ci sono risorse nella borsa che non erano incluse
+    // nell'array RESOURCE_ORDER, le stampiamo in coda per non perderle
+    for (resource_name, count) in counts {
+        if !RESOURCE_ORDER.contains(&resource_name.as_str()) && count > 0 {
+            lines.push(Line::from(vec![
+                Span::raw("    ").muted(theme),
+                Span::raw(format!("{}: ", resource_name)).muted(theme),
+                Span::styled(format!("{}", count), theme.value().bold()),
+            ]));
+        }
+    }
+
+    lines
 }
