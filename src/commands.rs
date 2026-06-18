@@ -1,7 +1,7 @@
 //! Side-effect commands emitted by UI controller.
 //! Executed by game loop against orchestrator and model.
 
-use common_game::components::resource::{BasicResourceType, ComplexResourceType, ResourceType};
+use common_game::components::resource::{ResourceType};
 
 use crate::game_state::GameState;
 

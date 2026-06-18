@@ -220,15 +220,6 @@ impl App {
 
 // Selector methods for explorers
 impl App {
-    pub(crate) fn get_bag_selected_explorer(&self) -> String {
-        match self.ui.selectors.explorers.last_selected() {
-            Some(selected) => match self.explorers_info.get_bag(&(selected as u32)) {
-                Some(bag) => bag_to_string(bag),
-                None => "None".to_string(),
-            },
-            None => "None".to_string(),
-        }
-    }
     pub(crate) fn get_planet_selected_explorer(&self) -> String {
         match self.ui.selectors.explorers.last_selected() {
             Some(selected) => match self.explorers_info.get_planet(&(selected as u32)) {

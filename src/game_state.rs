@@ -1,5 +1,5 @@
 use crate::{app::App, commands::Command, controller::Controller, input, ui_state::UiMode};
-use common_game::components::resource::ResourceType::{self, Basic, Complex};
+use common_game::components::resource::ResourceType::{Basic, Complex};
 use crossterm::event::{self, Event};
 use std::time::Duration;
 

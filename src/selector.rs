@@ -4,15 +4,13 @@
 use common_game::components::resource::{BasicResourceType, ComplexResourceType};
 use ratatui::widgets::{ListState, TableState};
 
-use crate::app::App;
-
 /// Generic row selector used by tables and lists.
 pub struct ListSelector {
     state: TableState,
     last_selected: Option<usize>,
 }
 
-enum ListFocus {
+pub(crate) enum ListFocus {
     BasicList,
     ComplexList,
 }
@@ -135,11 +133,6 @@ impl<T: Clone> ResourceSelector<T> {
 
     pub(crate) fn len(&self) -> usize {
         self.original_list.len()
-    }
-
-    /// Last non-`None` selection seen.
-    pub fn last_selected(&self) -> Option<usize> {
-        self.last_selected
     }
 
     /// Clear selection, keep last selection for restoring later.

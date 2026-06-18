@@ -368,13 +368,6 @@ impl Controller {
     }
 }
 
-fn current_generate_resource_explorer_id(mode: &UiMode) -> Option<u32> {
-    match mode {
-        UiMode::GenerateResource { explorer_id, .. } => Some(*explorer_id),
-        _ => None,
-    }
-}
-
 fn current_move_explorer_context(mode: &UiMode) -> Option<(u32, Focus)> {
     match mode {
         UiMode::MoveExplorer {
