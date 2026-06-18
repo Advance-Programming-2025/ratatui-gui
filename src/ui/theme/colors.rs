@@ -10,33 +10,11 @@ pub const MATRIX_GREEN: Color = Color::Rgb(51, 255, 51);
 pub struct Palette {
     /// Matrix brand green used by current layout styling.
     pub matrix_green: Color,
-    /// Main foreground for body text.
-    // pub fg_primary: Color,
-    /// Foreground for de-emphasized labels and separators.
-    // pub fg_muted: Color,
-    /// Foreground for accented UI elements.
-    // pub fg_accent: Color,
     /// Foreground for warnings and attention-grabbing elements.
     pub fg_warning: Color,
     /// Foreground for error or danger states.
     pub fg_danger: Color,
-    /// Foreground for success states.
-    // pub fg_success: Color,
-    /// Foreground for informational states.
-    // pub fg_info: Color,
-    /// Dimmer informational foreground for less prominent info.
-    // pub fg_info_dim: Color,
-    /// Foreground for key hints and shortcuts.
-    // pub fg_key: Color,
-    /// Foreground for navigation hints (arrows, selection guidance).
-    // pub fg_nav: Color,
-
-    /// Default border color for panels.
-    // pub border: Color,
-    /// Border color for active or focused panels.
-    // pub border_active: Color,
-
-    /// Background color for selection highlights.
+    //Background for selected instances
     pub bg_highlight: Color,
 }
 
