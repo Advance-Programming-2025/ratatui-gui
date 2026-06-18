@@ -1,5 +1,6 @@
 use common_game::components::resource::{BasicResourceType, ComplexResourceType};
 use omc_galaxy::{Orchestrator, PlanetInfoMap, utils::ExplorerInfoMap};
+use core::num;
 use std::{
     collections::VecDeque,
     sync::Arc,
@@ -119,6 +120,15 @@ impl App {
 
         self.orchestrator
             .initialize_galaxy_by_file(file_path.as_str().trim())
+            .map_err(|_| "Failed to initialize galaxy")?;
+
+        self.get_game_info_without_explorers()?;
+        Ok(())
+    }
+    pub fn initialize_by_random_planet(&mut self) -> Result<(), String> {
+        let num_planets = self.ui.start.custom_planet_count;
+        self.orchestrator
+            .initialize_galaxy_by_random_selection(num_planets)
             .map_err(|_| "Failed to initialize galaxy")?;
 
         self.get_game_info_without_explorers()?;

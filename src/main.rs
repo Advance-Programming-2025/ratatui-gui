@@ -35,9 +35,6 @@ fn main() -> Result<(), String> {
     // Create and run game loop
     let mut app = App::new(orchestrator, log_buffer)?;
 
-    // Initialize by file
-    app.initialize_by_file()?;
-
     // Start the app
     let result = app.run(&mut terminal);
 
