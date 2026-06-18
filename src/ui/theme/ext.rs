@@ -12,11 +12,13 @@ pub trait SpanThemeExt<'a> {
     fn danger(self, theme: &Theme) -> Span<'a>;
     /// Apply main value style.
     fn value(self, theme: &Theme) -> Span<'a>;
+
+    fn default(self, theme:&Theme)->Span<'a>;
 }
 
 impl<'a> SpanThemeExt<'a> for Span<'a> {
     fn muted(self, theme: &Theme) -> Span<'a> {
-        Self::styled(self.content, theme.matrix_green())
+        Self::styled(self.content, theme.default())
     }
 
     fn accent(self, theme: &Theme) -> Span<'a> {
@@ -29,6 +31,10 @@ impl<'a> SpanThemeExt<'a> for Span<'a> {
 
     fn value(self, theme: &Theme) -> Span<'a> {
         Self::styled(self.content, theme.value())
+    }
+
+    fn default(self, theme:&Theme)->Span<'a> {
+        Self::styled(self.content, theme.default())
     }
 }
 

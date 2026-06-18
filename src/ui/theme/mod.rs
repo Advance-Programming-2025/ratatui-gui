@@ -26,7 +26,7 @@ impl Theme {
     }
 
     /// Style for de-emphasized labels and separators.
-    pub fn matrix_green(&self) -> Style {
+    pub fn default(&self) -> Style {
         Style::default().fg(self.palette.matrix_green)
     }
 

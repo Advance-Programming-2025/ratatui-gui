@@ -21,7 +21,7 @@ pub(crate) fn render_log_overlay(app: &App, frame: &mut Frame, area: Rect, theme
                 Level::Warn => theme.warning().bold(),
                 Level::Info => theme.success().bold(),
                 Level::Debug => theme.accent().bold(),
-                Level::Trace => theme.matrix_green(),
+                Level::Trace => theme.default(),
             };
 
             Line::from(vec![

@@ -1,3 +1,4 @@
+use crossterm::style::style;
 use ratatui::{
     Frame,
     layout::{Alignment, Constraint, Layout, Rect},
@@ -13,7 +14,7 @@ use crate::ui::theme::{SpanThemeExt, Theme};
 pub(crate) fn render_globals_info(app: &App, frame: &mut Frame, area: Rect, theme: &Theme) {
     let outer = Block::default()
         .borders(Borders::ALL)
-        .border_style(theme.border());
+        .border_style(theme.default());
     let inner = outer.inner(area);
     frame.render_widget(outer, area);
 
@@ -25,25 +26,25 @@ pub(crate) fn render_globals_info(app: &App, frame: &mut Frame, area: Rect, them
     .areas(inner);
 
     let state_line = Line::from(vec![
-        Span::raw("Game ").muted(theme),
+        Span::raw("Game ").default(theme),
         Span::styled(
             format!("{:?}", app.gamestate),
-            theme.game_state_style(app.gamestate.clone()),
+            theme.default(),
         ),
     ]);
     let state = Paragraph::new(state_line).alignment(Alignment::Center);
     frame.render_widget(state, state_area);
 
     let time_line = Line::from(vec![
-        Span::raw("Time ").muted(theme),
-        Span::styled(app.sim_time_hms(), theme.value().bold()),
+        Span::raw("Time ").default(theme),
+        Span::styled(app.sim_time_hms(), theme.default().bold()),
     ]);
     let time = Paragraph::new(time_line).alignment(Alignment::Center);
     frame.render_widget(time, time_area);
 
     let sunray_line = Line::from(vec![
-        Span::raw("Sunray ").muted(theme),
-        Span::styled(format!("{}%", app.sunray_rate), theme.value().bold()),
+        Span::raw("Sunray ").default(theme),
+        Span::styled(format!("{}%", app.sunray_rate), theme.default().bold()),
     ]);
     let sunray = Paragraph::new(sunray_line).alignment(Alignment::Center);
     frame.render_widget(sunray, sunray_area);

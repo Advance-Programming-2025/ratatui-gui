@@ -82,7 +82,7 @@ fn render_title(frame: &mut Frame, area: Rect, theme: &Theme) {
     // 4. Creazione del BigText
     let big_title = BigText::builder()
         .pixel_size(PixelSize::Sextant) // Altezza: 4 righe. Usa PixelSize::Full per 8 righe.
-        .style(theme.matrix_green().add_modifier(Modifier::BOLD))
+        .style(theme.default().add_modifier(Modifier::BOLD))
         .lines(vec!["ONE MILLION CRABS GALAXY".into()])
         .build();
 
@@ -112,8 +112,8 @@ fn render_intro_text(frame: &mut Frame, area: Rect, theme: &Theme) {
             Block::default()
                 .title(" Mission Briefing ")
                 .title_alignment(Alignment::Center)
-                .title_style(theme.matrix_green().add_modifier(Modifier::BOLD))
-                .style(theme.matrix_green())
+                .title_style(theme.default().add_modifier(Modifier::BOLD))
+                .style(theme.default())
                 .border_style(theme.border()),
         );
 
@@ -129,12 +129,12 @@ fn render_generation_menu(app: &App, frame: &mut Frame, area: Rect, theme: &Them
     let random_style = if is_random {
         theme.header()
     } else {
-        theme.matrix_green()
+        theme.default()
     };
     let custom_style = if is_custom {
         theme.header()
     } else {
-        theme.matrix_green()
+        theme.default()
     };
 
     let menu_items = vec![
