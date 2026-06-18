@@ -1,5 +1,5 @@
 mod explorers;
-mod global;
+mod top_status_bar;
 mod instructions;
 mod log;
 mod planets;
@@ -34,7 +34,7 @@ pub(crate) fn render_game_ui(app: &mut App, frame: &mut Frame, theme: &Theme) {
     let [explorers_info_area, explorers_list_area] =
         Layout::vertical([Constraint::Percentage(45), Constraint::Fill(1)]).areas(explorers_area);
 
-    global::render_globals_info(app, frame, global_area, theme);
+    top_status_bar::render_globals_info(app, frame, global_area, theme);
     explorers::render_explorers(app, frame, explorers_list_area, theme);
     planets::render_planets_table(app, frame, planets_list_area, theme);
 
