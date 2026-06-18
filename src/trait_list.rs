@@ -1,4 +1,5 @@
 use common_game::components::resource::{BasicResourceType, ComplexResourceType, ResourceType};
+///Enables to print the common resources in the ratatui list
 pub(crate) trait Printable {
     fn to_print(&self) -> String;
 }

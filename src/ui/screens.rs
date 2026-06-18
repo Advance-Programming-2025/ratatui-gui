@@ -40,17 +40,15 @@ pub(crate) fn render_start_screen(app: &App, frame: &mut Frame, theme: &Theme) {
 
 /// Render top title bar for start screen.
 fn render_title(frame: &mut Frame, area: Rect, theme: &Theme) {
-    // 1. Disegna il blocco di sfondo con il bordo inferiore
     let block = Block::default().border_style(theme.border());
 
     let inner_area = block.inner(area);
     frame.render_widget(block, area);
 
-    // Scegliamo la dimensione del font.
-    // PixelSize::Half è alto 4 righe (ottimo per i titoli).
+    // Choose font dimension
     let font_height = 4;
 
-    // 2. Centratura VERTICALE
+    // Vertical alignment
     let vertical_chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -62,10 +60,7 @@ fn render_title(frame: &mut Frame, area: Rect, theme: &Theme) {
 
     let center_vertical_area = vertical_chunks[1];
 
-    // 3. Centratura ORIZZONTALE
-    // I widget di tui-big-text si allineano a sinistra di base dentro la loro area.
-    // Per centrarlo perfettamente, stimiamo la larghezza del testo.
-    // Ogni carattere in PixelSize::Half è largo circa 4/5 colonne.
+    // Horizontal center alignment
     let text_width = "ONE MILLION CRABS GALAXY".len() * 4;
 
     let horizontal_chunks = Layout::default()
@@ -79,14 +74,14 @@ fn render_title(frame: &mut Frame, area: Rect, theme: &Theme) {
 
     let final_title_area = horizontal_chunks[1];
 
-    // 4. Creazione del BigText
+    // Create big text
     let big_title = BigText::builder()
         .pixel_size(PixelSize::Sextant) // Altezza: 4 righe. Usa PixelSize::Full per 8 righe.
         .style(theme.default().add_modifier(Modifier::BOLD))
         .lines(vec!["ONE MILLION CRABS GALAXY".into()])
         .build();
 
-    // 5. Renderizza il titolo gigante al centro esatto
+    // Render the giant title
     frame.render_widget(big_title, final_title_area);
 }
 

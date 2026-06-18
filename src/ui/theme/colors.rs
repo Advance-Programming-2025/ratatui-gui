@@ -23,10 +23,6 @@ impl Palette {
     pub(crate) fn matrix() -> Self {
         Self {
             matrix_green: MATRIX_GREEN,
-
-            // fg_primary: Color::White,
-            // fg_muted: Color::Gray,
-            // fg_accent: Color::Cyan,
             fg_warning: Color::Yellow,
             fg_danger: Color::Red,
             bg_highlight: Color::DarkGray,

@@ -174,11 +174,10 @@ impl Controller {
 
                     let return_focus = app.ui.focus;
 
-                    // 2. Passa il PLANET_ID (e non l'explorer_id) al metodo!
                     let available_basic = app.get_supported_resource(planet_id);
                     let available_complex = app.get_supported_combination(planet_id); // Se usi questo per le complesse
 
-                    // 3. Inizializza le liste originali dei selettori con i dati reali del pianeta
+                    // Inizializza le liste originali dei selettori con i dati reali del pianeta
                     app.ui
                         .selectors
                         .basic_resources
@@ -188,7 +187,7 @@ impl Controller {
                         .complex_resource
                         .set_original_list(available_complex.clone());
 
-                    // 4. Ripristina gli indici visivi della selezione interna
+                    // Ripristina gli indici visivi della selezione interna
                     app.ui.selectors.basic_resources.restore_last();
 
                     app.ui.mode = UiMode::GenerateResource {

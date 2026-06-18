@@ -63,10 +63,10 @@ pub(crate) fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rec
     let inner_area = block.inner(area);
     frame.render_widget(block, area);
 
-    // 1. Recuperiamo l'ID corrente dell'explorer selezionato
+    // Recover the current explorer ID
     let explorer_id = app.get_id_selected_explorer();
 
-    // 2. Prepariamo i dettagli base dell'interfaccia
+    // Prepare the interface details
     let mut details = vec![
         Line::from(""),
         Line::from(vec![
@@ -81,12 +81,11 @@ pub(crate) fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rec
         Line::from(vec![Span::raw("  Bag Content:").default(theme)]),
     ];
 
-    // 3. Recuperiamo il vettore reale di ResourceType dell'explorer selezionato dalla mappa del gioco
+    // Recover the list of the bag resources
     if let Some(explorer_data) = app
         .explorers_info
         .get(&(app.ui.selectors.explorers.last_selected().unwrap() as u32))
     {
-        // Otteniamo le linee formattate ("Hydrogen: 1", ecc.) e le appendiamo a details
         let mut bag_lines = get_formatted_bag_contents(&explorer_data.bag, theme);
         details.append(&mut bag_lines);
     } else {
@@ -96,13 +95,13 @@ pub(crate) fn render_extra_info_explorer(app: &App, frame: &mut Frame, area: Rec
         ]));
     }
 
-    // 4. Disegniamo l'intero blocco di testo nel pannello
+    // Draw the info
     let paragraph = Paragraph::new(details).style(theme.value());
     frame.render_widget(paragraph, inner_area);
 }
 
-/// Prende la lista di risorse dell'explorer e restituisce un vettore di Line
-/// ordinate secondo un ordine specifico prefissato.
+/// Takes the list of explorer resources and returns a vector of Lines
+/// sorted in a predefined order.
 fn get_formatted_bag_contents<'a>(bag: &'a [ResourceType], theme: &'a Theme) -> Vec<Line<'a>> {
     if bag.is_empty() {
         return vec![Line::from(vec![
@@ -111,24 +110,22 @@ fn get_formatted_bag_contents<'a>(bag: &'a [ResourceType], theme: &'a Theme) -> 
         ])];
     }
 
-    // 1. Definiamo l'ordine esatto richiesto (basato sui nomi restituiti da to_print())
-    // Nota: "AI" corrisponde a ComplexResourceType::AIPartner nel tuo trait_list.rs
+    // Define the exact required order (based on the names returned by to_print())
     const RESOURCE_ORDER: &[&str] = &[
         "AI", "Robot", "Dolphin", "Life", "Water", "Diamond", "Silicon", "Oxygen", "Carbon",
         "Hydrogen",
     ];
 
-    // 2. Raccogliamo i conteggi delle risorse presenti nella borsa dentro una HashMap
+    // Collect the resource counts from the bag into a HashMap
     let mut counts = HashMap::new();
     for resource in bag {
         let name = resource.to_print();
         *counts.entry(name).or_insert(0) += 1;
     }
 
-    // 3. Generiamo le righe di testo seguendo RIGIDAMENTE l'ordine dell'array
+    // Generate the text lines strictly following the array order
     let mut lines = Vec::new();
     for &resource_name in RESOURCE_ORDER {
-        // Se l'explorer ha almeno 1 unità di questa risorsa, creiamo la riga
         if let Some(&count) = counts.get(resource_name) {
             if count > 0 {
                 lines.push(Line::from(vec![
@@ -140,8 +137,8 @@ fn get_formatted_bag_contents<'a>(bag: &'a [ResourceType], theme: &'a Theme) -> 
         }
     }
 
-    // Gestione di sicurezza: se ci sono risorse nella borsa che non erano incluse
-    // nell'array RESOURCE_ORDER, le stampiamo in coda per non perderle
+    // Safety handling: if there are resources in the bag that were not included
+    // in the RESOURCE_ORDER array, print them at the end so they aren't lost
     for (resource_name, count) in counts {
         if !RESOURCE_ORDER.contains(&resource_name.as_str()) && count > 0 {
             lines.push(Line::from(vec![

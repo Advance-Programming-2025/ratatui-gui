@@ -10,6 +10,7 @@ use crate::{game_state::GameState, tui_loggers::LogBuffer};
 
 use crate::ui_state::AppUi;
 
+/// Intermediate structure between the game engine and the UI
 pub(crate) struct App {
     //State of the game
     pub(crate) gamestate: GameState,

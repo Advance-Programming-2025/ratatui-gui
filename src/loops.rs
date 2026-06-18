@@ -6,6 +6,7 @@ use crate::game_state::{GameState, handle_game_state};
 use crate::ui::render_ui;
 
 impl App {
+    /// Start the game
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> Result<(), String> {
         while !self.exit {
             match self.get_game_state() {
@@ -18,6 +19,7 @@ impl App {
         Ok(())
     }
 
+    ///Ending game loop
     fn end_loop(&mut self, terminal: &mut DefaultTerminal) -> Result<(), String> {
         // Draw the start screen
         terminal
@@ -41,28 +43,28 @@ impl App {
         Ok(())
     }
 
-    /// Loop: tick management and orchestrator
+    /// Loop of actual game play
     fn active_loop(&mut self, terminal: &mut DefaultTerminal) -> Result<(), String> {
         while !self.exit && self.gamestate == GameState::Running {
             self.tick_sim_clock(Instant::now());
-            // --- 1. INPUT UTENTE (PRIMA DI TUTTO per massima reattività) ---
+            // User Input
             handle_game_state(self)?;
 
-            // --- 2. DISEGNO (Solo se è passato il tempo del frame_rate) ---
+            // Draw
             terminal
                 .draw(|frame| render_ui(self, frame))
                 .map_err(|_| "Error drawing UI")?;
 
-            // --- 3. GESTIONE MESSAGGI (Continua) ---
-            // Processiamo piccoli batch ad ogni iterazione del loop
+            // Handling Messages
+            // Process small batch at each iteration
             self.orchestrator.handle_game_messages()?;
 
-            // --- 4. TICK LOGICA (Eventi Spaziali) ---
+            // Spatial event
             if self.last_tick.elapsed() >= self.send_rate {
                 self.get_game_info()?; // Aggiorna info da orchestrator
                 self.orchestrator.send_bag_content_request_from_ui()?;
 
-                //Invia o sunray o asteroid in base alla code definita in App
+                //Send sunray or asteroid 
                 loop {
                     match self.pop_incoming_sunray_asteroid() {
                         Some((planet_id, is_sunray)) => {
@@ -72,7 +74,7 @@ impl App {
                     }
                 }
 
-                //Aggiungi un asteroid o sunray da inviare
+                //Add asteroid or sunray to send
                 if self.add_incoming_sunray_asteroid() == Err("No more planets alive".to_string()) {
                     self.gamestate = GameState::Ended;
                 }
@@ -80,8 +82,7 @@ impl App {
                 self.last_tick = Instant::now();
             }
 
-            // --- 5. RIPOSO (Opzionale ma consigliato) ---
-            // Un piccolo sleep per non bruciare la CPU se il loop è troppo veloce
+            // Small sleep to slow the loop update
             std::thread::sleep(Duration::from_millis(20));
         }
         Ok(())
@@ -91,23 +92,22 @@ impl App {
     fn paused_loop(&mut self, terminal: &mut DefaultTerminal) -> Result<(), String> {
         while !self.exit && self.gamestate == GameState::Paused {
             self.tick_sim_clock(Instant::now());
-            // --- 1. INPUT UTENTE (PRIMA DI TUTTO per massima reattività) ---
+            // User Input
             handle_game_state(self)?;
 
-            // --- 2. DISEGNO (Solo se è passato il tempo del frame_rate) ---
+            // Draw
             terminal
                 .draw(|frame| render_ui(self, frame))
                 .map_err(|_| "Error drawing UI")?;
 
-            // --- 3. GESTIONE MESSAGGI (Continua) ---
-            // Processiamo piccoli batch ad ogni iterazione del loop
+            // Handling Messages
+            // Process small batch at each iteration
             self.orchestrator.handle_game_messages()?;
 
-            // --- 4. TICK LOGICA (Eventi Spaziali) ---
+            // Update snapshot
             self.get_game_info()?; // Aggiorna info da orchestrator
 
-            // --- 5. RIPOSO (Opzionale ma consigliato) ---
-            // Un piccolo sleep per non bruciare la CPU se il loop è troppo veloce
+            // Sleep
             std::thread::sleep(Duration::from_millis(1));
         }
 
